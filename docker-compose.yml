@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+    marathon-api:
+        build: .
+        container_name: marathon-api
+        ports:
+            - 5000:5000
+        volumes:
+            - type: bind
+              source: ./
+              target: /app
+    swagger-ui:
+        container_name: swagger-ui
+        environment:
+            - SWAGGER_JSON=/swagger.yml
+        image: swaggerapi/swagger-ui
+        ports:
+            - 8080:8080
+        volumes:
+            - ./swagger.yml:/swagger.yml
+    postgres:
+        container_name: postgres
+        environment:
+            - POSTGRES_PASSWORD=example_password
+        image: postgres
+        ports:
+            - 5432:5432
+        volumes:
+            - ./initdb.d:/docker-entrypoint-initdb.d

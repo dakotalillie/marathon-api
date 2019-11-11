@@ -1,0 +1,653 @@
+openapi: 3.0.0
+info:
+    title: Marathon API
+    description: A REST API for the Marathon task-manager
+    version: '1.0.0'
+tags:
+    - name: boards
+      description: |
+          Task boards. Boards have tasks, which are organized into lanes.
+          They can belong to teams or to individual users.
+    - name: lanes
+      description: |
+          Lanes are the "columns" on a board. They contain tasks, and are ordered.
+    - name: tasks
+    - name: teams
+    - name: users
+paths:
+    /users:
+        get:
+            summary: queries all users on the platform
+            operationId: getUsers
+            description: |
+                You can search all users on the platform using this endpoint.
+                Try it, it's great fun!
+            responses:
+                '200':
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/User'
+                '400':
+                    description: bad input parameter
+            tags:
+                - users
+        post:
+            summary: create a new user
+            operationId: postUsers
+            description: |
+                You can create a new user using this endpoint
+            responses:
+                '201':
+                    description: user was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/User'
+            tags:
+                - users
+    /users/{userId}:
+        get:
+            summary: Retrieve data for an individual user
+            operationId: getUser
+            description: |
+                You can search an individual user by ID
+            parameters:
+                - in: path
+                  name: userId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the user
+            responses:
+                '200':
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/User'
+            tags:
+                - users
+        patch:
+            summary: Edit an individual user
+            operationId: patchUser
+            description: |
+                You can edit a user
+            parameters:
+                - in: path
+                  name: userId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the user
+            responses:
+                '200':
+                    description: The updated data for the user
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/User'
+            tags:
+                - users
+        delete:
+            summary: Delete an individual user
+            operationId: deleteUser
+            description: |
+                This endpoint allows you to delete a user, identified by their ID
+            parameters:
+                - in: path
+                  name: userId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the user
+            responses:
+                '204':
+                    description: The user was successfully deleted
+            tags:
+                - users
+    /teams:
+        get:
+            summary: Get all teams
+            operationId: getTeams
+            description: |
+                Search all teams on the platform
+            responses:
+                '200':
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Team'
+                '400':
+                    description: bad input parameter
+            tags:
+                - teams
+        post:
+            summary: Create a new team
+            operationId: postTeams
+            description: Create a new team
+            responses:
+                '201':
+                    description: The team was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Team'
+            tags:
+                - teams
+    /teams/{teamId}:
+        get:
+            summary: Get an individual team
+            operationId: getTeam
+            description: Get an individual team.
+            parameters:
+                - in: path
+                  name: teamId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the team
+            responses:
+                '200':
+                    description: The team was found and its information has been returned
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Team'
+            tags:
+                - teams
+        patch:
+            summary: Edit an individual team
+            operationId: patchTeam
+            description: Edit a team
+            parameters:
+                - in: path
+                  name: teamId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the team
+            responses:
+                '200':
+                    description: The updated data for the team
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Team'
+            tags:
+                - teams
+        delete:
+            summary: Delete an individual team
+            operationId: deleteTeam
+            description: Delete a team, identified by their ID
+            parameters:
+                - in: path
+                  name: teamId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the team
+            responses:
+                '204':
+                    description: The team was successfully deleted
+            tags:
+                - teams
+    /boards:
+        get:
+            summary: Get all boards
+            operationId: getBoards
+            description: |
+                Search all boards on the platform
+            responses:
+                '200':
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Board'
+                '400':
+                    description: bad input parameter
+            tags:
+                - boards
+        post:
+            summary: Create a new board
+            operationId: postBoards
+            description: Create a new Board
+            responses:
+                '201':
+                    description: The board was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Board'
+            tags:
+                - boards
+    /boards/{boardId}:
+        get:
+            summary: Get an individual board
+            operationId: getBoard
+            description: Get an individual board.
+            parameters:
+                - in: path
+                  name: boardId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the board
+            responses:
+                200:
+                    description: The board was found and its information has been returned
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Board'
+            tags:
+                - boards
+        patch:
+            summary: Edit an individual board
+            operationId: patchBoard
+            description: Edit a board
+            parameters:
+                - in: path
+                  name: boardId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the board
+            responses:
+                200:
+                    description: The updated data for the board
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Board'
+            tags:
+                - boards
+        delete:
+            summary: Delete an individual board
+            operationId: deleteBoard
+            description: Delete a board, identified by their ID
+            parameters:
+                - in: path
+                  name: boardId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the board
+            responses:
+                '204':
+                    description: The board was successfully deleted
+            tags:
+                - boards
+    /lanes:
+        get:
+            summary: Get all lanes
+            operationId: getLanes
+            description: Search all lanes on the platform
+            responses:
+                200:
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Lane'
+                400:
+                    description: bad input parameter
+            tags:
+                - lanes
+        post:
+            summary: Create a new lane
+            operationId: postLanes
+            description: Create a new Lane
+            responses:
+                201:
+                    description: The lane was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Lane'
+            tags:
+                - lanes
+    /lanes/{laneId}:
+        patch:
+            summary: Edit an individual lane
+            operationId: patchLane
+            description: Edit a lane
+            parameters:
+                - in: path
+                  name: laneId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the lane
+            responses:
+                200:
+                    description: The updated data for the lane
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Lane'
+            tags:
+                - lanes
+        delete:
+            summary: Delete a lane
+            operationId: deleteLane
+            description: Delete a lane, identified by their ID
+            parameters:
+                - in: path
+                  name: laneId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the lane
+            responses:
+                204:
+                    description: The lane was successfully deleted
+            tags:
+                - lanes
+    /tasks:
+        get:
+            summary: Get all tasks
+            operationId: getTasks
+            description: Get all tasks for a particular board
+            responses:
+                200:
+                    description: search results matching criteria
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Task'
+                400:
+                    description: bad input parameter
+            tags:
+                - tasks
+        post:
+            summary: Create a new task
+            operationId: postTasks
+            description: Create a new Task
+            responses:
+                201:
+                    description: The board was successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Task'
+            tags:
+                - tasks
+    /tasks/{taskId}:
+        get:
+            summary: Get an individual task
+            operationId: getTask
+            description: Get an individual task.
+            parameters:
+                - in: path
+                  name: taskId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the task
+            responses:
+                200:
+                    description: The task was found and its information has been returned
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Task'
+            tags:
+                - tasks
+        patch:
+            summary: Edit an individual task
+            operationId: patchTask
+            description: Edit a task
+            parameters:
+                - in: path
+                  name: taskId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the task
+            responses:
+                200:
+                    description: The updated data for the task
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                $ref: '#/components/schemas/Task'
+            tags:
+                - tasks
+        delete:
+            summary: Delete an individual task
+            operationId: deleteTask
+            description: Delete a task, identified by their ID
+            parameters:
+                - in: path
+                  name: taskId
+                  schema:
+                      type: string
+                      format: uuid
+                  required: true
+                  description: The ID of the task
+            responses:
+                204:
+                    description: The task was successfully deleted
+            tags:
+                - tasks
+
+components:
+    schemas:
+        User:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                first_name:
+                    type: string
+                    example: 'Joe'
+                last_name:
+                    type: string
+                    example: 'Schmo'
+                email:
+                    type: string
+                    format: email
+                    example: 'joeschmo@gmail.com'
+                password:
+                    type: string
+                    format: password
+                    writeOnly: true
+                username:
+                    type: string
+                    example: 'jschmo'
+                visibility:
+                    type: string
+                    enum: [public, private]
+                    example: 'public'
+                created_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                updated_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                is_active:
+                    type: boolean
+                    example: true
+        Team:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                name:
+                    type: string
+                    example: 'Team 1'
+                created_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                updated_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                is_active:
+                    type: boolean
+                    example: true
+        Board:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                name:
+                    type: string
+                    example: 'Example Board'
+                created_by:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                created_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                updated_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                is_active:
+                    type: boolean
+                    example: true
+        Lane:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                board_id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                name:
+                    type: string
+                    example: In Progress
+                index:
+                    type: integer
+                    format: int32
+                    example: 2
+                created_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                updated_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                is_active:
+                    type: boolean
+                    example: true
+        Task:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                title:
+                    type: string
+                    example: Implement getUsers endpoint
+                content:
+                    type: string
+                    example: We need to implement the getUsers endpoint so that we can query the list of users
+                lane_id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                board_id:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                index:
+                    type: integer
+                    format: int32
+                    example: 2
+                created_by:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                    readOnly: true
+                assigned_to:
+                    type: string
+                    format: uuid
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                created_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                updated_at:
+                    type: string
+                    format: date-time
+                    example: '2017-07-21T17:32:28Z'
+                    readOnly: true
+                is_active:
+                    type: boolean
+                    example: true
