@@ -2,8 +2,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 import pytest
 
-from src.db import DB
-
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_environment():

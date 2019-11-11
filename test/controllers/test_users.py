@@ -1,26 +1,7 @@
 import uuid
-import pytest
 
-from src.app import create_app
 from src.db import DB
 from src.models import User
-
-
-@pytest.fixture
-def app():
-    app = create_app()
-    app.config["TESTING"] = True
-    with app.app_context():
-        DB.create_all()
-        yield app
-        DB.session.close()
-        DB.drop_all()
-
-
-@pytest.fixture
-def client(app):
-    with app.test_client() as client:
-        yield client
 
 
 def test_user_list_get_without_auth(client):
