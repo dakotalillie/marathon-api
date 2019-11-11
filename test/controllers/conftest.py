@@ -25,10 +25,10 @@ def client(app):
 @pytest.fixture
 def existing_user(app):
     user = User(
-        first_name="Dakota",
-        last_name="Lillie",
-        username="dlillie",
-        email="dakota.lillie@icloud.com",
+        first_name="First",
+        last_name="Last",
+        username="username",
+        email="me@email.com",
         password="password",
     )
     DB.session.add(user)

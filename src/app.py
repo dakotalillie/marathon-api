@@ -26,7 +26,15 @@ def setup_api(app):
 
 def setup_jwt(app):
     app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
-    JWTManager(app)
+    jwt = JWTManager(app)
+
+    @jwt.unauthorized_loader
+    def unauthorized(reason):
+        return dict(message=reason), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token(reason):
+        return dict(message=reason), 422
 
 
 def create_app():

@@ -9,11 +9,13 @@ class User(DB.Model):
 
     __tablename__ = "users"
 
-    id = DB.Column(UUID(as_uuid=False), primary_key=True, default=uuid.uuid4().hex)
+    id = DB.Column(
+        UUID(as_uuid=False), primary_key=True, default=lambda: uuid.uuid4().hex
+    )
     first_name = DB.Column(DB.String, nullable=False)
     last_name = DB.Column(DB.String, nullable=False)
-    username = DB.Column(DB.String, nullable=False)
-    email = DB.Column(DB.String, nullable=False)
+    username = DB.Column(DB.String, nullable=False, unique=True)
+    email = DB.Column(DB.String, nullable=False, unique=True)
     password_hash = DB.Column(DB.String, nullable=False)
     visibility = DB.Column(DB.String, server_default="public")
     created_at = DB.Column(DB.DateTime, server_default="now")

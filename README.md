@@ -1,5 +1,7 @@
 # Marathon
 
+Marathon is a [JSON-API](https://jsonapi.org/) compliant API.
+
 ## Tech Stack
 
 -   Docker

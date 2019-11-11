@@ -7,7 +7,7 @@ from ..models import User
 class Auth(Resource):
     def __init__(self):
         super()
-        self.parser = self._make_parser()
+        self.parser = self.__make_parser()
 
     def post(self):
         args = self.parser.parse_args()
@@ -16,7 +16,7 @@ class Auth(Resource):
             return dict(access_token=create_access_token(identity=user.id))
         return dict(message="Invalid credentials"), 400
 
-    def _make_parser(self):
+    def __make_parser(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
             name="username", required=True, nullable=False, location="form"
