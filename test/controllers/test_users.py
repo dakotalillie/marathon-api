@@ -2,6 +2,7 @@ import uuid
 import pytest
 
 from src.app import create_app
+from src.db import DB
 from src.models import User
 
 
@@ -10,7 +11,10 @@ def app():
     app = create_app()
     app.config["TESTING"] = True
     with app.app_context():
+        DB.create_all()
         yield app
+        DB.session.close()
+        DB.drop_all()
 
 
 @pytest.fixture
@@ -29,7 +33,6 @@ def test_user_list_post_malformed_request(client):
     assert response.status_code == 400
 
 
-@pytest.mark.skip(reason="need to be able to clean this up")
 def test_user_list_post_success(client):
     response = client.post(
         "/users",
@@ -55,7 +58,15 @@ def test_user_detail_get_nonexistent(client):
 
 
 def test_user_detail_get_success(client):
-    user = User.query.filter_by(username="dlillie").first()
+    user = User(
+        first_name="Dakota",
+        last_name="Lillie",
+        username="dlillie",
+        email="dakota.lillie@icloud.com",
+        password_hash="password",
+    )
+    DB.session.add(user)
+    DB.session.commit()
     response = client.get(f"/users/{user.id}")
     assert response.status_code == 200
 
@@ -71,7 +82,15 @@ def test_user_detail_patch_nonexistent(client):
 
 
 def test_user_detail_patch_success(client):
-    user = User.query.filter_by(username="dlillie").first()
+    user = User(
+        first_name="Dakota",
+        last_name="Lillie",
+        username="dlillie",
+        email="dakota.lillie@icloud.com",
+        password_hash="password",
+    )
+    DB.session.add(user)
+    DB.session.commit()
     response = client.patch(f"/users/{user.id}", data=dict(first_name="Billy"))
     assert response.status_code == 200
     assert user.first_name == "Billy"
@@ -87,8 +106,15 @@ def test_user_detail_delete_nonexistent(client):
     assert response.status_code == 404
 
 
-@pytest.mark.skip(reason="need to be able to clean this up")
 def test_user_detail_delete_success(client):
-    user = User.query.filter_by(username="ewarren").first()
+    user = User(
+        first_name="Dakota",
+        last_name="Lillie",
+        username="dlillie",
+        email="dakota.lillie@icloud.com",
+        password_hash="password",
+    )
+    DB.session.add(user)
+    DB.session.commit()
     response = client.delete(f"/users/{user.id}")
     assert response.status_code == 204

@@ -24,7 +24,8 @@ services:
     postgres:
         container_name: postgres
         environment:
-            - POSTGRES_PASSWORD=example_password
+            - POSTGRES_MULTIPLE_DATABASES=marathon_test
+            - POSTGRES_PASSWORD=password
         image: postgres
         ports:
             - 5432:5432
