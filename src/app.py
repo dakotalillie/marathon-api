@@ -4,7 +4,8 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
 from .controllers.auth import Auth
-from .controllers.users import UserList, UserDetail
+from .controllers.user_list import UserList
+from .controllers.user_detail import UserDetail
 from .db import DB
 
 

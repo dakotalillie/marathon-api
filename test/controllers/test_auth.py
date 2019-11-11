@@ -1,6 +1,11 @@
 import json
 import pytest
 
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.controllers,
+]
+
 
 @pytest.mark.parametrize(
     "test_input,expected",
