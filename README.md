@@ -35,3 +35,11 @@ The data for the database will be refreshed every time a new instance of the pos
 ## Directory Structure
 
 `initdb.d` is a directory containing scripts that will be run by the development PostgreSQL server upon startup.
+
+## Tests
+
+To run test, source the virtual environment and run:
+
+```bash
+python3 -m pytest
+```

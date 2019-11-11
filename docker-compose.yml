@@ -3,6 +3,8 @@ services:
     marathon-api:
         build: .
         container_name: marathon-api
+        env_file:
+            - env/dev.env
         ports:
             - 5000:5000
         volumes:
