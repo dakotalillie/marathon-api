@@ -12,9 +12,9 @@ class Auth(Resource):
     def post(self):
         args = self.parser.parse_args()
         user = User.query.filter_by(username=args["username"]).first()
-        if user.has_password(args["password"]):
+        if user and user.has_password(args["password"]):
             return dict(access_token=create_access_token(identity=user.id))
-        return None, 401
+        return dict(message="Invalid credentials"), 400
 
     def _make_parser(self):
         parser = reqparse.RequestParser()
