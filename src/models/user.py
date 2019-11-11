@@ -10,7 +10,7 @@ class User(DB.Model):
     __tablename__ = "users"
 
     id = DB.Column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: uuid.uuid4().hex
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     first_name = DB.Column(DB.String, nullable=False)
     last_name = DB.Column(DB.String, nullable=False)

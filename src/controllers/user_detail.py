@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required
 
 from ..db import DB
 from ..models import User
@@ -10,10 +11,35 @@ class UserDetail(Resource):
         super()
         self.parser = self._make_parser()
 
+    @jwt_required
     def get(self, user_id):
         if not is_valid_uuid(user_id):
-            return (None, 404)
-        user = User.query.filter_by(id=user_id).first_or_404()
+            return (
+                dict(
+                    errors=[
+                        dict(
+                            status=400,
+                            title="Invalid UUID",
+                            detail=f"User ID {user_id} is not a valid UUID",
+                        )
+                    ]
+                ),
+                400,
+            )
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            return (
+                dict(
+                    errors=[
+                        dict(
+                            status=404,
+                            title="User not found",
+                            detail=f"No User exists with the ID {user_id}",
+                        )
+                    ]
+                ),
+                404,
+            )
         return {
             "data": dict(
                 id=str(user.id),

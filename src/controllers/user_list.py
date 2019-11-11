@@ -6,7 +6,6 @@ from sqlalchemy.exc import IntegrityError
 
 from ..db import DB
 from ..models import User
-from ..utils.is_valid_uuid import is_valid_uuid
 
 
 class UserList(Resource):

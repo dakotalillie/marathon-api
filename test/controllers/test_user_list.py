@@ -26,7 +26,7 @@ def test_user_list_get_without_auth(client):
 def test_user_list_get_with_invalid_auth(client):
     """
     WHEN a get request is made to `/users` with an invalid token in the `authorization` header
-    THEN the response should have a 401 status code and indicate that the token is invalid
+    THEN the response should have a 422 status code and indicate that the authorization header is malformed
     """
 
     response = client.get("/users", headers=dict(authorization="abcdefg"))
