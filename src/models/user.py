@@ -1,4 +1,5 @@
 import uuid
+import bcrypt
 from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
@@ -18,6 +19,21 @@ class User(DB.Model):
     created_at = DB.Column(DB.DateTime, server_default="now")
     updated_at = DB.Column(DB.DateTime, server_default="now")
     is_active = DB.Column(DB.Boolean, server_default="true")
+
+    @property
+    def password(self):
+        raise AttributeError("password not readable")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
+
+    def has_password(self, password):
+        return bcrypt.checkpw(
+            password.encode("utf-8"), self.password_hash.encode("utf-8")
+        )
 
     def __repr__(self):
         return f"<User(first_name='{self.first_name}', last_name='{self.last_name}')>"

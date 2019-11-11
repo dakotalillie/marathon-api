@@ -1,6 +1,5 @@
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
-import bcrypt
 
 from ..db import DB
 from ..models import User
@@ -33,12 +32,7 @@ class UserList(Resource):
 
     def post(self):
         args = self.parser.parse_args()
-        user = User(
-            **{k: v for k, v in args.items() if k != "password"},
-            password_hash=bcrypt.hashpw(
-                args["password"].encode("utf-8"), bcrypt.gensalt()
-            ).decode("utf-8"),
-        )
+        user = User(**{k: v for k, v in args.items()})
         DB.session.add(user)
         DB.session.commit()
         return (
@@ -97,13 +91,7 @@ class UserDetail(Resource):
         user = User.query.filter_by(id=user_id).first_or_404()
         args = self.parser.parse_args()
         for key, value in args.items():
-            if value is None:
-                continue
-            if key == "password":
-                user.password_hash = bcrypt.hashpw(
-                    value.encode("utf-8"), bcrypt.gensalt()
-                )
-            else:
+            if value is not None:
                 setattr(user, key, value)
         DB.session.add(user)
         DB.session.commit()
