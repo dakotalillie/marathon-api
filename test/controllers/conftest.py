@@ -34,3 +34,17 @@ def existing_user(app):
     DB.session.add(user)
     DB.session.commit()
     yield user
+
+
+@pytest.fixture
+def user2(app):
+    user = User(
+        first_name="user2 first name",
+        last_name="user2 last name",
+        username="user2",
+        email="user2@email.com",
+        password="password",
+    )
+    DB.session.add(user)
+    DB.session.commit()
+    yield user
