@@ -34,6 +34,7 @@ def create_app():
     setup_db(app)
     setup_api(app)
     setup_jwt(app)
+    app.config["BUNDLE_ERRORS"] = True
     return app
 
 

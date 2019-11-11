@@ -1,16 +1,49 @@
-from src.db import DB
-from src.models import User
+import json
+import pytest
 
 
-def test_auth_success(client):
-    user = User(
-        first_name="Dakota",
-        last_name="Lillie",
-        username="dlillie",
-        email="dakota.lillie@icloud.com",
-        password="password",
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            dict(),
+            dict(
+                username="Missing required parameter in the post body",
+                password="Missing required parameter in the post body",
+            ),
+        ),
+        (
+            dict(username="username"),
+            dict(password="Missing required parameter in the post body"),
+        ),
+        (
+            dict(password="password"),
+            dict(username="Missing required parameter in the post body"),
+        ),
+    ],
+)
+def test_auth_post_missing_arguments(client, test_input, expected):
+    """
+    WHEN a post request is made to the `/auth` enpoint that lacks the requirement arguments
+    THEN the response should have a 400 status code and indicate which arguments are missing
+    """
+
+    response = client.post("/auth", data=test_input)
+    assert response.status_code == 400
+    assert json.loads(response.data.decode()) == dict(message=expected)
+
+
+def test_auth_post_success(client, existing_user):
+    """
+    GIVEN a pre-existing user
+    WHEN a post request is made to the `/auth` endpoint with the correct credentials for that user
+    THEN the response should have a 200 status code and include an access token
+    """
+
+    # `password` is a write-only field, so we can't reference it from existing_user
+    response = client.post(
+        "/auth", data=dict(username=existing_user.username, password="password")
     )
-    DB.session.add(user)
-    DB.session.commit()
-    response = client.post("/auth", data=dict(username="dlillie", password="password"))
+
     assert response.status_code == 200
+    assert b"access_token" in response.data

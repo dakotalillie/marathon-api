@@ -18,6 +18,10 @@ class Auth(Resource):
 
     def _make_parser(self):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="username", required=True, type=str, nullable=False)
-        parser.add_argument(name="password", required=True, type=str, nullable=False)
+        parser.add_argument(
+            name="username", required=True, nullable=False, location="form"
+        )
+        parser.add_argument(
+            name="password", required=True, nullable=False, location="form"
+        )
         return parser

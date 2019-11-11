@@ -2,6 +2,7 @@ import pytest
 
 from src.app import create_app
 from src.db import DB
+from src.models import User
 
 
 @pytest.fixture(name="app")
@@ -19,3 +20,17 @@ def app_fixture():
 def client(app):
     with app.test_client() as test_client:
         yield test_client
+
+
+@pytest.fixture
+def existing_user(app):
+    user = User(
+        first_name="Dakota",
+        last_name="Lillie",
+        username="dlillie",
+        email="dakota.lillie@icloud.com",
+        password="password",
+    )
+    DB.session.add(user)
+    DB.session.commit()
+    yield user
