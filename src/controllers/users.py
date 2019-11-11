@@ -4,6 +4,7 @@ import bcrypt
 
 from ..db import DB
 from ..models import User
+from ..utils.is_valid_uuid import is_valid_uuid
 
 
 class UserList(Resource):
@@ -11,7 +12,7 @@ class UserList(Resource):
         super()
         self.parser = self._make_parser()
 
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         return {
             "data": [
@@ -73,6 +74,8 @@ class UserDetail(Resource):
         self.parser = self._make_parser()
 
     def get(self, user_id):
+        if not is_valid_uuid(user_id):
+            return (None, 404)
         user = User.query.filter_by(id=user_id).first_or_404()
         return {
             "data": dict(
@@ -89,6 +92,8 @@ class UserDetail(Resource):
         }
 
     def patch(self, user_id):
+        if not is_valid_uuid(user_id):
+            return (None, 404)
         user = User.query.filter_by(id=user_id).first_or_404()
         args = self.parser.parse_args()
         for key, value in args.items():
@@ -119,6 +124,8 @@ class UserDetail(Resource):
         )
 
     def delete(self, user_id):
+        if not is_valid_uuid(user_id):
+            return (None, 404)
         user = User.query.filter_by(id=user_id).first_or_404()
         DB.session.delete(user)
         DB.session.commit()

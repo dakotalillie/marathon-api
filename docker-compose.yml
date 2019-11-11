@@ -7,6 +7,7 @@ services:
             - env/dev.env
         ports:
             - 5000:5000
+        restart: always
         volumes:
             - type: bind
               source: ./
