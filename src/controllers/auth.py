@@ -1,14 +1,23 @@
-import bcrypt
+from flask_restful import Resource, reqparse
+from flask_jwt_extended import create_access_token
 
 from ..models import User
 
 
-def authenticate(username, password):
-    user = User.query.filter_by(username=username).first()
-    if user.has_password(password):
-        return user
+class Auth(Resource):
+    def __init__(self):
+        super()
+        self.parser = self._make_parser()
 
+    def post(self):
+        args = self.parser.parse_args()
+        user = User.query.filter_by(username=args["username"]).first()
+        if user.has_password(args["password"]):
+            return dict(access_token=create_access_token(identity=user.id))
+        return None, 401
 
-def identity(payload):
-    user_id = payload["identity"]
-    return User.query.filter_by(id=user_id).first()
+    def _make_parser(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="username", required=True, type=str, nullable=False)
+        parser.add_argument(name="password", required=True, type=str, nullable=False)
+        return parser

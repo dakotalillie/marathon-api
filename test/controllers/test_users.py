@@ -44,7 +44,7 @@ def test_user_detail_get_success(client):
         last_name="Lillie",
         username="dlillie",
         email="dakota.lillie@icloud.com",
-        password_hash="password",
+        password="password",
     )
     DB.session.add(user)
     DB.session.commit()

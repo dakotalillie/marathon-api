@@ -8,7 +8,7 @@ black==19.10b0
 cffi==1.13.2
 Click==7.0
 Flask==1.1.1
-Flask-JWT==0.3.2
+Flask-JWT-Extended==3.24.1
 Flask-RESTful==0.3.7
 Flask-SQLAlchemy==2.4.1
 importlib-metadata==0.23
@@ -26,7 +26,7 @@ psycopg2-binary==2.8.4
 ptvsd==4.3.2
 py==1.8.0
 pycparser==2.19
-PyJWT==1.4.2
+PyJWT==1.7.1
 pylint==2.4.3
 pylint-flask-sqlalchemy==0.1.0
 pylint-plugin-utils==0.6

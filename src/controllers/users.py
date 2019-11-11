@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required
 
 from ..db import DB
 from ..models import User
@@ -11,7 +11,7 @@ class UserList(Resource):
         super()
         self.parser = self._make_parser()
 
-    @jwt_required()
+    @jwt_required
     def get(self):
         return {
             "data": [

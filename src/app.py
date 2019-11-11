@@ -1,9 +1,9 @@
 import os
 from flask import Flask
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt_extended import JWTManager
 
-from .controllers.auth import authenticate, identity
+from .controllers.auth import Auth
 from .controllers.users import UserList, UserDetail
 from .db import DB
 
@@ -19,12 +19,14 @@ def setup_db(app):
 
 def setup_api(app):
     api = Api(app)
+    api.add_resource(Auth, "/auth")
     api.add_resource(UserList, "/users")
     api.add_resource(UserDetail, "/users/<user_id>")
 
 
 def setup_jwt(app):
-    JWT(app, authenticate, identity)
+    app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
+    JWTManager(app)
 
 
 def create_app():
@@ -32,7 +34,6 @@ def create_app():
     setup_db(app)
     setup_api(app)
     setup_jwt(app)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     return app
 
 
