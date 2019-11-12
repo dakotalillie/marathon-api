@@ -4,7 +4,7 @@ _This repo is a work in progress_
 
 Marathon will be a task-managing app, similar to Jira or Trello. This is a practice project for me to refamiliarize myself with backend development after spending my days at work as a frontend developer.
 
-Currently, all that's up and running is JWT authentication and CRUD for the User resource. It's basic, but I'm focusing on quality over quantity &mdash; I want to make sure the code is well structured and tested before expanding the functionality. You can see some of the tasks I have planned on the Kanban Project board.
+Currently, all that's up and running is JWT authentication and CRUD for the User resource. It's basic, but I'm focusing on quality over quantity &mdash; I want to make sure the code is well structured and tested before expanding the functionality. You can see some of the tasks I have planned on the [Kanban Project board](https://github.com/dakotalillie/marathon-api/projects/1).
 
 ## Tech Stack
 
