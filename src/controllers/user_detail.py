@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse, marshal
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
+from ..exceptions import ForbiddenError, InvalidUUIDError, NotFoundError
 from ..models import User
 from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
@@ -15,76 +16,23 @@ class UserDetail(Resource):
     @jwt_required
     def get(self, user_id):
         if not is_valid_uuid(user_id):
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=400,
-                            title="Invalid UUID",
-                            detail=f"User ID {user_id} is not a valid UUID",
-                        )
-                    ]
-                ),
-                400,
-            )
+            raise InvalidUUIDError(f"User ID {user_id} is not a valid UUID")
         user = User.query.filter_by(id=user_id).first()
         if not user:
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=404,
-                            title="User not found",
-                            detail=f"No User exists with the ID {user_id}",
-                        )
-                    ]
-                ),
-                404,
-            )
+            raise NotFoundError(f"No User exists with the ID {user_id}")
         return marshal(user, UserMarshaller.all(), envelope="data")
 
     @jwt_required
     def patch(self, user_id):
         if not is_valid_uuid(user_id):
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=400,
-                            title="Invalid UUID",
-                            detail=f"User ID {user_id} is not a valid UUID",
-                        )
-                    ]
-                ),
-                400,
-            )
+            raise InvalidUUIDError(f"User ID {user_id} is not a valid UUID")
         user = User.query.filter_by(id=user_id).first()
         if not user:
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=404,
-                            title="User not found",
-                            detail=f"No User exists with the ID {user_id}",
-                        )
-                    ]
-                ),
-                404,
-            )
+            raise NotFoundError(f"No User exists with the ID {user_id}")
         current_user_id = get_jwt_identity()
         if user.id != current_user_id:
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=403,
-                            title="Forbidden Operation",
-                            detail=f"User {current_user_id} does not have permission to modify User {user.id}",
-                        )
-                    ]
-                ),
-                403,
+            raise ForbiddenError(
+                f"User {current_user_id} does not have permission to modify User {user.id}"
             )
         args = self.parser.parse_args()
         for key, value in args.items():
@@ -97,46 +45,14 @@ class UserDetail(Resource):
     @jwt_required
     def delete(self, user_id):
         if not is_valid_uuid(user_id):
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=400,
-                            title="Invalid UUID",
-                            detail=f"User ID {user_id} is not a valid UUID",
-                        )
-                    ]
-                ),
-                400,
-            )
+            raise InvalidUUIDError(f"User ID {user_id} is not a valid UUID")
         user = User.query.filter_by(id=user_id).first()
         if not user:
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=404,
-                            title="User not found",
-                            detail=f"No User exists with the ID {user_id}",
-                        )
-                    ]
-                ),
-                404,
-            )
+            raise NotFoundError(f"No User exists with the ID {user_id}")
         current_user_id = get_jwt_identity()
         if user.id != current_user_id:
-            print("hi!")
-            return (
-                dict(
-                    errors=[
-                        dict(
-                            status=403,
-                            title="Forbidden Operation",
-                            detail=f"User {current_user_id} does not have permission to modify User {user.id}",
-                        )
-                    ]
-                ),
-                403,
+            raise ForbiddenError(
+                f"User {current_user_id} does not have permission to modify User {user.id}"
             )
         DB.session.delete(user)
         DB.session.commit()

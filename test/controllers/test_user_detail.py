@@ -5,6 +5,7 @@ from flask_jwt_extended import create_access_token
 from flask_restful import marshal
 import pytest
 
+from src.exceptions import InvalidUUIDError, ForbiddenError, NotFoundError
 from src.models import User
 from src.marshallers import UserMarshaller
 
@@ -52,13 +53,7 @@ def test_user_detail_get_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=400,
-                title="Invalid UUID",
-                detail=f"User ID abcdefg is not a valid UUID",
-            )
-        ]
+        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 
@@ -75,13 +70,7 @@ def test_user_detail_get_nonexistent(client, user1):
     )
     assert response.status_code == 404
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=404,
-                title="User not found",
-                detail=f"No User exists with the ID {user_id}",
-            )
-        ]
+        errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
 
 
@@ -141,13 +130,7 @@ def test_user_detail_patch_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=400,
-                title="Invalid UUID",
-                detail=f"User ID abcdefg is not a valid UUID",
-            )
-        ]
+        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 
@@ -165,13 +148,7 @@ def test_user_detail_patch_nonexistent(client, user1):
     )
     assert response.status_code == 404
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=404,
-                title="User not found",
-                detail=f"No User exists with the ID {user_id}",
-            )
-        ]
+        errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
 
 
@@ -189,11 +166,9 @@ def test_user_detail_patch_different_user(client, user1, user2):
     assert response.status_code == 403
     assert json.loads(response.data.decode()) == dict(
         errors=[
-            dict(
-                status=403,
-                title="Forbidden Operation",
-                detail=f"User {user2.id} does not have permission to modify User {user1.id}",
-            )
+            ForbiddenError(
+                f"User {user2.id} does not have permission to modify User {user1.id}"
+            ).to_dict()
         ]
     )
 
@@ -257,13 +232,7 @@ def test_user_detail_delete_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=400,
-                title="Invalid UUID",
-                detail=f"User ID abcdefg is not a valid UUID",
-            )
-        ]
+        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 
@@ -280,13 +249,7 @@ def test_user_detail_delete_nonexistent(client, user1):
     )
     assert response.status_code == 404
     assert json.loads(response.data.decode()) == dict(
-        errors=[
-            dict(
-                status=404,
-                title="User not found",
-                detail=f"No User exists with the ID {user_id}",
-            )
-        ]
+        errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
 
 
@@ -303,11 +266,9 @@ def test_user_detail_delete_different_user(client, user1, user2):
     assert response.status_code == 403
     assert json.loads(response.data.decode()) == dict(
         errors=[
-            dict(
-                status=403,
-                title="Forbidden Operation",
-                detail=f"User {user2.id} does not have permission to modify User {user1.id}",
-            )
+            ForbiddenError(
+                f"User {user2.id} does not have permission to modify User {user1.id}"
+            ).to_dict()
         ]
     )
 

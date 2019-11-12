@@ -7,6 +7,7 @@ from .controllers.auth import Auth
 from .controllers.user_list import UserList
 from .controllers.user_detail import UserDetail
 from .db import DB
+from .exceptions import ForbiddenError, InvalidUUIDError, NotFoundError
 
 
 def setup_db(app):
@@ -38,12 +39,31 @@ def setup_jwt(app):
         return dict(message=reason), 422
 
 
+def setup_error_handling(app):
+    app.config["BUNDLE_ERRORS"] = True
+
+    def handle_error(error):
+        return dict(errors=[error.to_dict()]), error.status_code
+
+    @app.errorhandler(ForbiddenError)
+    def handle_forbidden_error(error):
+        return handle_error(error)
+
+    @app.errorhandler(InvalidUUIDError)
+    def handle_invalid_uuid_error(error):
+        return handle_error(error)
+
+    @app.errorhandler(NotFoundError)
+    def handle_not_found_error(error):
+        return handle_error(error)
+
+
 def create_app():
     app = Flask(__name__)
     setup_db(app)
     setup_api(app)
     setup_jwt(app)
-    app.config["BUNDLE_ERRORS"] = True
+    setup_error_handling(app)
     return app
 
 
