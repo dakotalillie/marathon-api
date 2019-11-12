@@ -1,6 +1,6 @@
 import re
 
-from flask_restful import Resource, reqparse, marshal_with, marshal
+from flask_restful import Resource, reqparse, marshal_with
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
@@ -29,11 +29,7 @@ class UserList(Resource):
             DB.session.commit()
         except IntegrityError as error:
             DB.session.rollback()
-            duplicated_field = self.__find_duplicated_field(error)
-            if duplicated_field:
-                raise ConflictError(
-                    f"User with {duplicated_field} {args[duplicated_field]} already exists"
-                )
+            self.__check_for_conflict(error, args)
             raise
         return user, 201
 
@@ -44,6 +40,13 @@ class UserList(Resource):
                 name=arg, required=True, nullable=False, location="form"
             )
         return parser
+
+    def __check_for_conflict(self, error, args):
+        duplicated_field = self.__find_duplicated_field(error)
+        if duplicated_field:
+            raise ConflictError(
+                f"User with {duplicated_field} {args[duplicated_field]} already exists"
+            )
 
     def __find_duplicated_field(self, error):
         return next(

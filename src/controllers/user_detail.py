@@ -10,6 +10,9 @@ from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
 
 
+# TODO - aside from the "user_id" kwarg, these operations are generic. Look into
+# decoupling them from the kwarg, and moving them to a seperate module for reuse.
+
 def validate_uuid(user_id):
     if not is_valid_uuid(user_id):
         raise BadRequestError(f"User ID {user_id} is not a valid UUID")
@@ -84,9 +87,6 @@ class UserDetail(Resource):
 
     def __make_parser(self):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="first_name", type=str, nullable=False)
-        parser.add_argument(name="last_name", type=str, nullable=False)
-        parser.add_argument(name="username", type=str, nullable=False)
-        parser.add_argument(name="email", type=str, nullable=False)
-        parser.add_argument(name="password", type=str, nullable=False)
+        for key in ("first_name", "last_name", "username", "email", "password");
+            parser.add_argument(name=key, type=str, nullable=False, location="form")
         return parser
