@@ -134,7 +134,7 @@ def test_user_detail_patch_non_uuid(client, user1):
     )
 
 
-def test_user_detail_patch_nonexistent(client, user1):
+def test_user_detail_patch_nonexistent(client):
     """
     WHEN a patch request is made to `/users/<user_id>` but no user with the given ID exists
     THEN the response should have a 404 status and indicate that no user with the given ID exists
@@ -144,7 +144,7 @@ def test_user_detail_patch_nonexistent(client, user1):
     response = client.patch(
         f"/users/{user_id}",
         data=dict(first_name="first"),
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
     )
     assert response.status_code == 404
     assert json.loads(response.data.decode()) == dict(
@@ -236,7 +236,7 @@ def test_user_detail_delete_non_uuid(client, user1):
     )
 
 
-def test_user_detail_delete_nonexistent(client, user1):
+def test_user_detail_delete_nonexistent(client):
     """
     WHEN a delete request is made to `/users/<user_id>` but no user with the given ID exists
     THEN the response should have a 404 status and indicate that no user with the given ID exists
@@ -245,7 +245,7 @@ def test_user_detail_delete_nonexistent(client, user1):
     user_id = str(uuid.uuid4())
     response = client.delete(
         f"/users/{user_id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
     )
     assert response.status_code == 404
     assert json.loads(response.data.decode()) == dict(
