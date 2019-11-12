@@ -250,25 +250,117 @@ def test_user_detail_patch_success(client, existing_user):
     )
 
 
-def test_user_detail_delete_non_uuid(client):
-    response = client.delete("/users/abcdefg")
-    assert response.status_code == 404
+def test_user_detail_delete_without_auth(client, existing_user):
+    """
+    WHEN a delete request is made to `/users/<user_id>` without a token in the `authorization` header
+    THEN the response should have a 401 status code and indicate that the header is missing
+    """
 
-
-def test_user_detail_delete_nonexistent(client):
-    response = client.delete(f"/users/{uuid.uuid4().hex}")
-    assert response.status_code == 404
-
-
-def test_user_detail_delete_success(client):
-    user = User(
-        first_name="Dakota",
-        last_name="Lillie",
-        username="dlillie",
-        email="dakota.lillie@icloud.com",
-        password="password",
+    response = client.delete(f"/users/{existing_user.id}")
+    assert response.status_code == 401
+    assert json.loads(response.data.decode()) == dict(
+        message="Missing Authorization Header"
     )
-    DB.session.add(user)
-    DB.session.commit()
-    response = client.delete(f"/users/{user.id}")
+
+
+def test_user_detail_delete_with_invalid_auth(client, existing_user):
+    """
+    WHEN a delete request is made to `/users/<user_id>` with an invalid token in the `authorization` header
+    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    """
+
+    response = client.delete(
+        f"/users/{existing_user.id}", headers=dict(authorization="abcdefg")
+    )
+    assert response.status_code == 422
+    assert json.loads(response.data.decode()) == dict(
+        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
+    )
+
+
+def test_user_detail_delete_non_uuid(client, existing_user):
+    """
+    WHEN a delete request is made to `/users/<user_id>` but the user ID is not a valid UUID
+    THEN the response should have a 400 status and indicate that the provided user ID is not a valid UUID
+    """
+
+    response = client.delete(
+        "/users/abcdefg",
+        headers=dict(
+            authorization=f"Bearer {create_access_token(identity=existing_user.id)}"
+        ),
+    )
+    assert response.status_code == 400
+    assert json.loads(response.data.decode()) == dict(
+        errors=[
+            dict(
+                status=400,
+                title="Invalid UUID",
+                detail=f"User ID abcdefg is not a valid UUID",
+            )
+        ]
+    )
+
+
+def test_user_detail_delete_nonexistent(client, existing_user):
+    """
+    WHEN a delete request is made to `/users/<user_id>` but no user with the given ID exists
+    THEN the response should have a 404 status and indicate that no user with the given ID exists
+    """
+
+    user_id = str(uuid.uuid4())
+    response = client.delete(
+        f"/users/{user_id}",
+        headers=dict(
+            authorization=f"Bearer {create_access_token(identity=existing_user.id)}"
+        ),
+    )
+    assert response.status_code == 404
+    assert json.loads(response.data.decode()) == dict(
+        errors=[
+            dict(
+                status=404,
+                title="User not found",
+                detail=f"No User exists with the ID {user_id}",
+            )
+        ]
+    )
+
+
+def test_user_detail_delete_different_user(client, existing_user, user2):
+    """
+    WHEN a delete request is made to `/users/<user_id>` with a token for a different user than the one in the URI
+    THEN the response should have a 403 status code and indicate that the operation is forbidden
+    """
+
+    response = client.delete(
+        f"/users/{existing_user.id}",
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user2.id)}"),
+    )
+    assert response.status_code == 403
+    assert json.loads(response.data.decode()) == dict(
+        errors=[
+            dict(
+                status=403,
+                title="Forbidden Operation",
+                detail=f"User {user2.id} does not have permission to modify User {existing_user.id}",
+            )
+        ]
+    )
+
+
+def test_user_detail_delete_success(client, existing_user):
+    """
+    GIVEN an existing user on the platform
+    WHEN a delete request is made to `/users/<user_id>` with the user's ID
+    THEN the response should have a 204 status code
+    """
+
+    response = client.delete(
+        f"/users/{existing_user.id}",
+        headers=dict(
+            authorization=f"Bearer {create_access_token(identity=existing_user.id)}"
+        ),
+    )
     assert response.status_code == 204
+    assert len(response.data) is 0
