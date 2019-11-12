@@ -1,16 +1,23 @@
-# Marathon
+# Marathon API
 
-Marathon is a [JSON-API](https://jsonapi.org/) compliant API.
+_This repo is a work in progress_
+
+Marathon will be a task-managing app, similar to Jira or Trello. This is a practice project for me to refamiliarize myself with backend-development after largely spending my time at work as a frontend developer.
 
 ## Tech Stack
 
--   Docker
+This app is built using:
+
+-   Python >= 3.6
 -   Flask
--   Swagger
 -   SQLAlchemy
 -   PostgreSQL
+-   Docker
+-   Swagger
 
-Code is linted using pylint, formatted using black, and tested using pytest. This app also uses mypy for static typing.
+The code is linted using pylint, formatted using black, and tested using pytest.
+
+I intend for this to adhere to the [JSON-API](https://jsonapi.org/) standard, although more work needs to be done to ensure full compliance.
 
 ## Development Setup
 
