@@ -81,4 +81,4 @@ def test_auth_post_success(client, user1):
     )
 
     assert response.status_code == 200
-    assert b"access_token" in response.data
+    assert json.loads(response.data.decode())["data"]["access_token"] is not None

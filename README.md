@@ -21,7 +21,7 @@ I intend for this to adhere to the [JSON-API](https://jsonapi.org/) standard, al
 
 ## Development Setup
 
-Make sure you have Docker installed. Then run:
+Make sure you have Docker and Docker Compose installed. Then run:
 
 ```bash
 docker-compose up
