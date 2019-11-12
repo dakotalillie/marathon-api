@@ -49,29 +49,29 @@ def test_auth_post_nonexistent_user(client):
     assert json.loads(response.data.decode()) == dict(message="Invalid credentials")
 
 
-def test_auth_post_incorrect_password(client, existing_user):
+def test_auth_post_incorrect_password(client, user1):
     """
     GIVEN a pre-existing user
     WHEN a post request is made to the `/auth` endpoint with an incorrect password for that user
     THEN the response should have a 400 status code and indicate the credentials were invalid
     """
     response = client.post(
-        "/auth", data=dict(username=existing_user.username, password="wrong_password")
+        "/auth", data=dict(username=user1.username, password="wrong_password")
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(message="Invalid credentials")
 
 
-def test_auth_post_success(client, existing_user):
+def test_auth_post_success(client, user1):
     """
     GIVEN a pre-existing user
     WHEN a post request is made to the `/auth` endpoint with the correct credentials for that user
     THEN the response should have a 200 status code and include an access token
     """
 
-    # `password` is a write-only field, so we can't reference it from existing_user
+    # `password` is a write-only field, so we can't reference it from user1
     response = client.post(
-        "/auth", data=dict(username=existing_user.username, password="password")
+        "/auth", data=dict(username=user1.username, password="password")
     )
 
     assert response.status_code == 200

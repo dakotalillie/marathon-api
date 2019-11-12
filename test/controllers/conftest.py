@@ -23,7 +23,7 @@ def client(app):
 
 
 @pytest.fixture
-def existing_user(app):
+def user1(app):
     user = User(
         first_name="First",
         last_name="Last",

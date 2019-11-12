@@ -39,7 +39,7 @@ def test_user_list_get_with_invalid_auth(client):
     )
 
 
-def test_user_list_get_success(client, existing_user):
+def test_user_list_get_success(client, user1):
     """
     GIVEN there are existing users on the platform
     WHEN a get request is made to `/users` with valid authorization
@@ -48,13 +48,11 @@ def test_user_list_get_success(client, existing_user):
 
     response = client.get(
         "/users",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=existing_user.id)}"
-        ),
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": [dict(marshal(existing_user, UserMarshaller.all()))]
+        "data": [dict(marshal(user1, UserMarshaller.all()))]
     }
 
 
@@ -76,7 +74,7 @@ def test_user_list_post_missing_parameters(client):
     )
 
 
-def test_user_list_post_duplicate_email(client, existing_user):
+def test_user_list_post_duplicate_email(client, user1):
     """
     GIVEN a pre-existing user
     WHEN a post request is made to `/users` with the same email as that user
@@ -89,7 +87,7 @@ def test_user_list_post_duplicate_email(client, existing_user):
             first_name="first",
             last_name="last",
             username="new_username",
-            email=existing_user.email,
+            email=user1.email,
             password="password",
         ),
     )
@@ -99,13 +97,13 @@ def test_user_list_post_duplicate_email(client, existing_user):
             dict(
                 status=409,
                 title="User already exists",
-                detail=f"User with email {existing_user.email} already exists",
+                detail=f"User with email {user1.email} already exists",
             )
         ]
     )
 
 
-def test_user_list_post_duplicate_username(client, existing_user):
+def test_user_list_post_duplicate_username(client, user1):
     """
     GIVEN a pre-existing user
     WHEN a post request is made to `/users` with the same username as that user
@@ -116,7 +114,7 @@ def test_user_list_post_duplicate_username(client, existing_user):
         data=dict(
             first_name="first",
             last_name="last",
-            username=existing_user.username,
+            username=user1.username,
             email="new_email",
             password="password",
         ),
@@ -127,7 +125,7 @@ def test_user_list_post_duplicate_username(client, existing_user):
             dict(
                 status=409,
                 title="User already exists",
-                detail=f"User with username {existing_user.username} already exists",
+                detail=f"User with username {user1.username} already exists",
             )
         ]
     )
