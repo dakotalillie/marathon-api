@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token
 from flask_restful import marshal
 import pytest
 
+from src.exceptions import ConflictError
 from src.models import User
 from src.marshallers import UserMarshaller
 
@@ -94,11 +95,7 @@ def test_user_list_post_duplicate_email(client, user1):
     assert response.status_code == 409
     assert json.loads(response.data.decode()) == dict(
         errors=[
-            dict(
-                status=409,
-                title="User already exists",
-                detail=f"User with email {user1.email} already exists",
-            )
+            ConflictError(f"User with email {user1.email} already exists").to_dict()
         ]
     )
 
@@ -122,11 +119,9 @@ def test_user_list_post_duplicate_username(client, user1):
     assert response.status_code == 409
     assert json.loads(response.data.decode()) == dict(
         errors=[
-            dict(
-                status=409,
-                title="User already exists",
-                detail=f"User with username {user1.username} already exists",
-            )
+            ConflictError(
+                f"User with username {user1.username} already exists"
+            ).to_dict()
         ]
     )
 

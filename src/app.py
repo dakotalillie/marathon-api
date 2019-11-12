@@ -7,7 +7,7 @@ from .controllers.auth import Auth
 from .controllers.user_list import UserList
 from .controllers.user_detail import UserDetail
 from .db import DB
-from .exceptions import ForbiddenError, InvalidUUIDError, NotFoundError
+from .exceptions import ConflictError, ForbiddenError, InvalidUUIDError, NotFoundError
 
 
 def setup_db(app):
@@ -44,6 +44,10 @@ def setup_error_handling(app):
 
     def handle_error(error):
         return dict(errors=[error.to_dict()]), error.status_code
+
+    @app.errorhandler(ConflictError)
+    def handle_conflict_error(error):
+        return handle_error(error)
 
     @app.errorhandler(ForbiddenError)
     def handle_forbidden_error(error):

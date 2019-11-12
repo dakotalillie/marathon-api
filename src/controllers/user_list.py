@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from ..db import DB
+from ..exceptions import ConflictError
 from ..models import User
 from ..marshallers import UserMarshaller
 
@@ -29,8 +30,8 @@ class UserList(Resource):
             DB.session.rollback()
             duplicated_field = self.__find_duplicated_field(error)
             if duplicated_field:
-                return self.__get_duplicate_error_response(
-                    duplicated_field, args[duplicated_field]
+                raise ConflictError(
+                    f"User with {duplicated_field} {args[duplicated_field]} already exists"
                 )
             raise
         return marshal(user, UserMarshaller.all(), envelope="data"), 201
@@ -51,18 +52,4 @@ class UserList(Resource):
                 f'duplicate key value violates unique constraint "users_{key}_key"',
                 str(error),
             )
-        )
-
-    def __get_duplicate_error_response(self, duplicated_field, value):
-        return (
-            dict(
-                errors=[
-                    dict(
-                        status=409,
-                        title="User already exists",
-                        detail=f"User with {duplicated_field} {value} already exists",
-                    )
-                ]
-            ),
-            409,
         )
