@@ -13,6 +13,7 @@ from ..utils.is_valid_uuid import is_valid_uuid
 # TODO - aside from the "user_id" kwarg, these operations are generic. Look into
 # decoupling them from the kwarg, and moving them to a seperate module for reuse.
 
+
 def validate_uuid(user_id):
     if not is_valid_uuid(user_id):
         raise BadRequestError(f"User ID {user_id} is not a valid UUID")
@@ -54,7 +55,7 @@ def with_user(func):
 
 class UserDetail(Resource):
     def __init__(self):
-        Resource.__init__(self)
+        super().__init__()
         self.parser = self.__make_parser()
 
     @jwt_required
@@ -87,6 +88,6 @@ class UserDetail(Resource):
 
     def __make_parser(self):
         parser = reqparse.RequestParser()
-        for key in ("first_name", "last_name", "username", "email", "password");
+        for key in ("first_name", "last_name", "username", "email", "password"):
             parser.add_argument(name=key, type=str, nullable=False, location="form")
         return parser

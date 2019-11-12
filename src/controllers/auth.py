@@ -7,7 +7,7 @@ from ..models import User
 
 class Auth(Resource):
     def __init__(self):
-        super()
+        super().__init__()
         self.parser = self.__make_parser()
 
     @marshal_with(dict(access_token=fields.String), envelope="data")

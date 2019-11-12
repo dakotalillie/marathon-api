@@ -2,7 +2,7 @@ class ForbiddenError(Exception):
     status_code = 403
 
     def __init__(self, message="The requested operation is forbidden"):
-        Exception.__init__(self)
+        super().__init__()
         self.message = message
 
     def to_dict(self):

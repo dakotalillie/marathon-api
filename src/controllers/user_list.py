@@ -12,7 +12,7 @@ from ..marshallers import UserMarshaller
 
 class UserList(Resource):
     def __init__(self):
-        super()
+        super().__init__()
         self.parser = self.__make_parser()
 
     @jwt_required

@@ -4,7 +4,7 @@ class ConflictError(Exception):
     def __init__(
         self, message="The requested operation could not be completed due to a conflict"
     ):
-        Exception.__init__(self)
+        super().__init__()
         self.message = message
 
     def to_dict(self):
