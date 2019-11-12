@@ -6,9 +6,15 @@ from ..db import DB
 
 
 class User(DB.Model):
+    """
+    A class which is used for interacting with the `users` table in the database
+    """
 
     __tablename__ = "users"
 
+    """
+    Table Columns
+    """
     id = DB.Column(
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )

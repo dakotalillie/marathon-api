@@ -1,8 +1,9 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, marshal
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
 from ..models import User
+from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
 
 
@@ -40,19 +41,7 @@ class UserDetail(Resource):
                 ),
                 404,
             )
-        return {
-            "data": dict(
-                id=str(user.id),
-                first_name=user.first_name,
-                last_name=user.last_name,
-                username=user.username,
-                email=user.email,
-                visibility=user.visibility,
-                created_at=str(user.created_at),
-                updated_at=str(user.updated_at),
-                is_active=user.is_active,
-            )
-        }
+        return marshal(user, UserMarshaller.all(), envelope="data")
 
     @jwt_required
     def patch(self, user_id):
@@ -103,22 +92,7 @@ class UserDetail(Resource):
                 setattr(user, key, value)
         DB.session.add(user)
         DB.session.commit()
-        return (
-            {
-                "data": dict(
-                    id=str(user.id),
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    username=user.username,
-                    email=user.email,
-                    visibility=user.visibility,
-                    created_at=str(user.created_at),
-                    updated_at=str(user.updated_at),
-                    is_active=user.is_active,
-                )
-            },
-            200,
-        )
+        return marshal(user, UserMarshaller.all(), envelope="data")
 
     @jwt_required
     def delete(self, user_id):

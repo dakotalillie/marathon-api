@@ -1,8 +1,11 @@
 import json
+
 from flask_jwt_extended import create_access_token
+from flask_restful import marshal
 import pytest
 
 from src.models import User
+from src.marshallers import UserMarshaller
 
 pytestmark = [
     pytest.mark.integration,
@@ -50,21 +53,9 @@ def test_user_list_get_success(client, existing_user):
         ),
     )
     assert response.status_code == 200
-    assert json.loads(response.data.decode()) == dict(
-        data=[
-            dict(
-                id=str(existing_user.id),
-                first_name=existing_user.first_name,
-                last_name=existing_user.last_name,
-                username=existing_user.username,
-                email=existing_user.email,
-                visibility=existing_user.visibility,
-                created_at=str(existing_user.created_at),
-                updated_at=str(existing_user.updated_at),
-                is_active=existing_user.is_active,
-            )
-        ]
-    )
+    assert json.loads(response.data.decode()) == {
+        "data": [dict(marshal(existing_user, UserMarshaller.all()))]
+    }
 
 
 def test_user_list_post_missing_parameters(client):
@@ -159,16 +150,6 @@ def test_user_list_post_success(client):
     )
     user = User.query.filter_by(username="username").first()
     assert response.status_code == 201
-    assert json.loads(response.data.decode()) == dict(
-        data=dict(
-            id=str(user.id),
-            first_name=user.first_name,
-            last_name=user.last_name,
-            username=user.username,
-            email=user.email,
-            visibility=user.visibility,
-            created_at=str(user.created_at),
-            updated_at=str(user.updated_at),
-            is_active=user.is_active,
-        )
-    )
+    assert json.loads(response.data.decode()) == {
+        "data": dict(marshal(user, UserMarshaller.all()))
+    }

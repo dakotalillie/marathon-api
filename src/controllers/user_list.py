@@ -1,11 +1,12 @@
 import re
 
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, marshal_with, marshal
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 from ..db import DB
 from ..models import User
+from ..marshallers import UserMarshaller
 
 
 class UserList(Resource):
@@ -14,23 +15,9 @@ class UserList(Resource):
         self.parser = self.__make_parser()
 
     @jwt_required
+    @marshal_with(UserMarshaller.all(), envelope="data")
     def get(self):
-        return {
-            "data": [
-                dict(
-                    id=str(user.id),
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    username=user.username,
-                    email=user.email,
-                    visibility=user.visibility,
-                    created_at=str(user.created_at),
-                    updated_at=str(user.updated_at),
-                    is_active=user.is_active,
-                )
-                for user in User.query.all()
-            ],
-        }
+        return User.query.all()
 
     def post(self):
         args = self.parser.parse_args()
@@ -46,22 +33,7 @@ class UserList(Resource):
                     duplicated_field, args[duplicated_field]
                 )
             raise
-        return (
-            dict(
-                data=dict(
-                    id=str(user.id),
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    username=user.username,
-                    email=user.email,
-                    visibility=user.visibility,
-                    created_at=str(user.created_at),
-                    updated_at=str(user.updated_at),
-                    is_active=user.is_active,
-                )
-            ),
-            201,
-        )
+        return marshal(user, UserMarshaller.all(), envelope="data"), 201
 
     def __make_parser(self):
         parser = reqparse.RequestParser()

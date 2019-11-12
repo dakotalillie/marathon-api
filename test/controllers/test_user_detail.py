@@ -1,11 +1,12 @@
 import json
 import uuid
 
+from flask_jwt_extended import create_access_token
+from flask_restful import marshal
 import pytest
 
-from src.db import DB
 from src.models import User
-from flask_jwt_extended import create_access_token
+from src.marshallers import UserMarshaller
 
 pytestmark = [
     pytest.mark.integration,
@@ -102,19 +103,9 @@ def test_user_detail_get_success(client, existing_user):
         ),
     )
     assert response.status_code == 200
-    assert json.loads(response.data.decode()) == dict(
-        data=dict(
-            id=str(existing_user.id),
-            first_name=existing_user.first_name,
-            last_name=existing_user.last_name,
-            username=existing_user.username,
-            email=existing_user.email,
-            visibility=existing_user.visibility,
-            created_at=str(existing_user.created_at),
-            updated_at=str(existing_user.updated_at),
-            is_active=existing_user.is_active,
-        )
-    )
+    assert json.loads(response.data.decode()) == {
+        "data": dict(marshal(existing_user, UserMarshaller.all()))
+    }
 
 
 def test_user_detail_patch_without_auth(client):
@@ -235,19 +226,9 @@ def test_user_detail_patch_success(client, existing_user):
     assert (
         User.query.filter_by(id=existing_user.id).first().first_name == "updated_first"
     )
-    assert json.loads(response.data.decode()) == dict(
-        data=dict(
-            id=str(existing_user.id),
-            first_name=existing_user.first_name,
-            last_name=existing_user.last_name,
-            username=existing_user.username,
-            email=existing_user.email,
-            visibility=existing_user.visibility,
-            created_at=str(existing_user.created_at),
-            updated_at=str(existing_user.updated_at),
-            is_active=existing_user.is_active,
-        )
-    )
+    assert json.loads(response.data.decode()) == {
+        "data": dict(marshal(existing_user, UserMarshaller.all()))
+    }
 
 
 def test_user_detail_delete_without_auth(client, existing_user):
