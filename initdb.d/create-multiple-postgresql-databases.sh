@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Taken from https://github.com/mrts/docker-postgresql-multiple-databases
+# Copied from https://github.com/mrts/docker-postgresql-multiple-databases
 
 set -e
 set -u

@@ -82,34 +82,3 @@ CREATE TABLE tasks (
     updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_active   BOOLEAN     NOT NULL DEFAULT true
 );
-
-INSERT INTO users (first_name, last_name, username, email, password_hash)
-VALUES
-    ('Dakota', 'Lillie', 'dlillie', 'dakota.lillie@icloud.com', 'abcdefg'),
-    ('Lauren', 'Settembrino', 'lsette', 'lauren.settembrino@gmail.com', 'abcdefg'),
-    ('Spencer', 'Corpuz', 'scorpuz', 'spencer.corpuz@gmail.com', 'abcdefg');
-
-INSERT INTO teams (name)
-VALUES ('Team 1');
-
-INSERT INTO users_teams(user_id, team_id)
-SELECT (
-    SELECT id
-    FROM users
-    WHERE username = 'dlillie'
-), (
-    SELECT id
-    FROM teams
-    WHERE name = 'Team 1'
-);
-
-INSERT INTO users_teams(user_id, team_id)
-SELECT (
-    SELECT id
-    FROM users
-    WHERE username = 'lsette'
-), (
-    SELECT id
-    FROM teams
-    WHERE name = 'Team 1'
-);
