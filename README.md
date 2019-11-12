@@ -49,7 +49,7 @@ Note that the data is not currently being persisted to a volume &mdash; if you k
 
 ## Tests
 
-Tests are currently set up to run locally. To run them, first create a virtual environment, source it, and install the project dependencies:
+Tests are currently set up to run locally. To run them, you'll need to make sure you have Python 3.6 or above installed. Then create a virtual environment, source it, and install the project dependencies:
 
 ```bash
 python3 -m venv .venv
