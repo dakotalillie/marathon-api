@@ -1,6 +1,8 @@
 import json
 import pytest
 
+from src.exceptions import BadRequestError
+
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.controllers,
@@ -46,7 +48,9 @@ def test_auth_post_nonexistent_user(client):
 
     response = client.post("/auth", data=dict(username="username", password="password"))
     assert response.status_code == 400
-    assert json.loads(response.data.decode()) == dict(message="Invalid credentials")
+    assert json.loads(response.data.decode()) == dict(
+        errors=[BadRequestError("Invalid credentials").to_dict()]
+    )
 
 
 def test_auth_post_incorrect_password(client, user1):
@@ -59,7 +63,9 @@ def test_auth_post_incorrect_password(client, user1):
         "/auth", data=dict(username=user1.username, password="wrong_password")
     )
     assert response.status_code == 400
-    assert json.loads(response.data.decode()) == dict(message="Invalid credentials")
+    assert json.loads(response.data.decode()) == dict(
+        errors=[BadRequestError("Invalid credentials").to_dict()]
+    )
 
 
 def test_auth_post_success(client, user1):

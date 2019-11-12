@@ -20,6 +20,7 @@ class UserList(Resource):
     def get(self):
         return User.query.all()
 
+    @marshal_with(UserMarshaller.all(), envelope="data")
     def post(self):
         args = self.parser.parse_args()
         user = User(**args)
@@ -34,7 +35,7 @@ class UserList(Resource):
                     f"User with {duplicated_field} {args[duplicated_field]} already exists"
                 )
             raise
-        return marshal(user, UserMarshaller.all(), envelope="data"), 201
+        return user, 201
 
     def __make_parser(self):
         parser = reqparse.RequestParser()
