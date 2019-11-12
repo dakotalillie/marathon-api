@@ -7,13 +7,7 @@ from .controllers.auth import Auth
 from .controllers.user_list import UserList
 from .controllers.user_detail import UserDetail
 from .db import DB
-from .exceptions import (
-    BadRequestError,
-    ConflictError,
-    ForbiddenError,
-    InvalidUUIDError,
-    NotFoundError,
-)
+from .exceptions import BadRequestError, ConflictError, ForbiddenError, NotFoundError
 
 
 def setup_db(app):
@@ -51,7 +45,6 @@ def setup_error_handling(app):
     @app.errorhandler(BadRequestError)
     @app.errorhandler(ConflictError)
     @app.errorhandler(ForbiddenError)
-    @app.errorhandler(InvalidUUIDError)
     @app.errorhandler(NotFoundError)
     def handle_error(error):
         return dict(errors=[error.to_dict()]), error.status_code

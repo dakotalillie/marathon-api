@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token
 from flask_restful import marshal
 import pytest
 
-from src.exceptions import InvalidUUIDError, ForbiddenError, NotFoundError
+from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import User
 from src.marshallers import UserMarshaller
 
@@ -53,7 +53,7 @@ def test_user_detail_get_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
+        errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 
@@ -130,7 +130,7 @@ def test_user_detail_patch_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
+        errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 
@@ -232,7 +232,7 @@ def test_user_detail_delete_non_uuid(client, user1):
     )
     assert response.status_code == 400
     assert json.loads(response.data.decode()) == dict(
-        errors=[InvalidUUIDError("User ID abcdefg is not a valid UUID").to_dict()]
+        errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
 
 

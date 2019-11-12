@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse, marshal_with
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
-from ..exceptions import ForbiddenError, InvalidUUIDError, NotFoundError
+from ..exceptions import BadRequestError, ForbiddenError, NotFoundError
 from ..models import User
 from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
@@ -12,7 +12,7 @@ from ..utils.is_valid_uuid import is_valid_uuid
 
 def validate_uuid(user_id):
     if not is_valid_uuid(user_id):
-        raise InvalidUUIDError(f"User ID {user_id} is not a valid UUID")
+        raise BadRequestError(f"User ID {user_id} is not a valid UUID")
 
 
 def validate_permissions(user_id):

@@ -9,4 +9,3 @@ class ConflictError(Exception):
 
     def to_dict(self):
         return dict(title="Conflict", status=409, detail=self.message)
-
