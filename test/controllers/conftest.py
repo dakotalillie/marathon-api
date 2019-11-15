@@ -7,7 +7,7 @@ from src.models import User
 
 @pytest.fixture(name="app")
 def app_fixture():
-    app = create_app()
+    app = create_app(db_name="marathon_test")
     app.config["TESTING"] = True
     with app.app_context():
         DB.create_all()

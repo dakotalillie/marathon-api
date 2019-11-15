@@ -23,7 +23,7 @@ I intend for this to adhere to the [JSON-API](https://jsonapi.org/) standard, al
 
 ## Development Setup
 
-Make sure you have Docker and Docker Compose installed. Copy the `env/sample.dev.env` file to a new file, `env/dev.env`. Then run:
+Make sure you have Docker and Docker Compose installed. Copy the `env/sample.dev.env` file to a new file, `.env`. Then run:
 
 ```bash
 docker-compose -f docker/docker-compose.dev.yml up
@@ -55,16 +55,8 @@ Note that the data is not currently being persisted to a volume &mdash; if you k
 
 ## Tests
 
-Tests are currently set up to run locally. To run them, you'll need to make sure you have Python 3.6 or above installed. Then create a virtual environment, source it, and install the project dependencies:
+To run tests, first make sure the `marathon-api` and `postgresql` containers are running. Then run:
 
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
 ```
-
-Copy the `env/sample.test.env` file to `env/test.env`, and make sure the postgres container is running. Then you can run the tests with:
-
-```bash
-python -m pytest
+docker exec marathon-api python -m pytest
 ```

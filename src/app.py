@@ -10,11 +10,10 @@ from .db import DB
 from .exceptions import BadRequestError, ConflictError, ForbiddenError, NotFoundError
 
 
-def setup_db(app):
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-        f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-    )
+def setup_db(app, db_user, db_password, db_host, db_port, db_name):
+    app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ] = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     DB.init_app(app)
 
@@ -50,9 +49,15 @@ def setup_error_handling(app):
         return dict(errors=[error.to_dict()]), error.status_code
 
 
-def create_app():
+def create_app(
+    db_user=os.getenv("DB_USER"),
+    db_password=os.getenv("DB_PASSWORD"),
+    db_host=os.getenv("DB_HOST"),
+    db_port=os.getenv("DB_PORT"),
+    db_name=os.getenv("DB_NAME"),
+):
     app = Flask(__name__)
-    setup_db(app)
+    setup_db(app, db_user, db_password, db_host, db_port, db_name)
     setup_api(app)
     setup_jwt(app)
     setup_error_handling(app)
