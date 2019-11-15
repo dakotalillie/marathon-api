@@ -4,23 +4,10 @@ services:
         build: .
         container_name: marathon-api
         env_file:
-            - env/dev.env
+            - ../env/dev.env
         ports:
             - 5000:5000
         restart: always
-        volumes:
-            - type: bind
-              source: ./
-              target: /app
-    swagger-ui:
-        container_name: swagger-ui
-        environment:
-            - SWAGGER_JSON=/swagger.yml
-        image: swaggerapi/swagger-ui
-        ports:
-            - 8080:8080
-        volumes:
-            - ./swagger.yml:/swagger.yml
     postgres:
         container_name: postgres
         environment:
@@ -30,4 +17,4 @@ services:
         ports:
             - 5432:5432
         volumes:
-            - ./initdb.d:/docker-entrypoint-initdb.d
+            - ../initdb.d:/docker-entrypoint-initdb.d

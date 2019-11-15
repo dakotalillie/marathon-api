@@ -26,7 +26,7 @@ I intend for this to adhere to the [JSON-API](https://jsonapi.org/) standard, al
 Make sure you have Docker and Docker Compose installed. Copy the `env/sample.dev.env` file to a new file, `env/dev.env`. Then run:
 
 ```bash
-docker-compose up
+docker-compose -f docker/docker-compose.dev.yml up
 ```
 
 This will build the image for the app locally and start the following containers:
@@ -36,6 +36,12 @@ This will build the image for the app locally and start the following containers
 -   A postgres server, running on port 5432
 
 Note that the swagger UI docs were mostly using for endpoint planning and mapping out a crude domain model. They are not currently up to date, though I intend on updating them once more of the core functionality is in place.
+
+To stop the containers, you can run:
+
+```bash
+docker-compose -f docker/docker-compose.dev.yml down
+```
 
 ## Accessing the Database
 
