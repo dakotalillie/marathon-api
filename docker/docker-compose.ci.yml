@@ -10,12 +10,13 @@ services:
             - 5000:5000
         restart: always
     postgres:
+        build:
+            context: .
+            dockerfile: postgres.Dockerfile
         container_name: postgres
         environment:
             - POSTGRES_MULTIPLE_DATABASES=marathon_test
             - POSTGRES_PASSWORD=password
-        image: postgres
+        image: marathon-api-postgres
         ports:
             - 5432:5432
-        volumes:
-            - ../initdb.d:/docker-entrypoint-initdb.d
