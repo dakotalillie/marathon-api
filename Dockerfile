@@ -4,11 +4,11 @@ VOLUME /app
 
 WORKDIR /app
 
-COPY .. .
+COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV FLASK_APP ../src/app.py
+ENV FLASK_APP src/app.py
 ENV FLASK_ENV development
 
 EXPOSE 5000

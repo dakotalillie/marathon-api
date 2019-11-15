@@ -1,10 +1,11 @@
 version: '3.7'
 services:
     marathon-api:
-        build: .
+        build: ..
         container_name: marathon-api
         env_file:
             - ../env/dev.env
+        image: marathon-api
         ports:
             - 5000:5000
         restart: always
