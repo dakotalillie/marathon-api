@@ -6,6 +6,7 @@ pipeline {
                 checkout scm
                 sh 'cp env/sample.dev.env .env'
                 sh 'make start-ci -- -d --build'
+                sleep(5)
             }
         }
         stage('Test') {
