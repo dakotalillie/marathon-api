@@ -23,10 +23,16 @@ I intend for this to adhere to the [JSON-API](https://jsonapi.org/) standard, al
 
 ## Development Setup
 
-Make sure you have Docker and Docker Compose installed. Copy the `env/sample.dev.env` file to a new file, `.env`. Then run:
+Make sure you have Make, Docker and Docker Compose installed. Copy the `env/sample.dev.env` file to a new file, `.env`, in the project root. Then run:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml up
+make start-dev
+```
+
+Or if you want to run the app in the background:
+
+```bash
+make start-dev -- -d
 ```
 
 This will build the image for the app locally and start the following containers:
@@ -40,7 +46,7 @@ Note that the swagger UI docs were mostly using for endpoint planning and mappin
 To stop the containers, you can run:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml down
+make stop-dev
 ```
 
 ## Accessing the Database
@@ -48,7 +54,7 @@ docker-compose -f docker/docker-compose.dev.yml down
 To gain terminal access to postgres, you can run:
 
 ```bash
-docker exec -itu postgres postgres psql
+make db-shell
 ```
 
 Note that the data is not currently being persisted to a volume &mdash; if you kill the postgres container and start a new one, you'll be back to a blank slate. This is intentional for early development.
@@ -58,5 +64,5 @@ Note that the data is not currently being persisted to a volume &mdash; if you k
 To run tests, first make sure the `marathon-api` and `postgresql` containers are running. Then run:
 
 ```
-docker exec marathon-api python -m pytest
+make tests
 ```
