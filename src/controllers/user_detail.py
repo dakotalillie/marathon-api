@@ -1,17 +1,12 @@
-import functools
-
 from flask_restful import Resource, reqparse, marshal_with
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
-from ..exceptions import BadRequestError, ForbiddenError, NotFoundError
+from ..exceptions import BadRequestError, ForbiddenError
 from ..models import User
 from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
-
-
-# TODO - aside from the "user_id" kwarg, these operations are generic. Look into
-# decoupling them from the kwarg, and moving them to a seperate module for reuse.
+from ..utils.controller_decorators import call_before, get_resource
 
 
 def validate_uuid(user_id):
@@ -27,47 +22,21 @@ def validate_permissions(user_id):
         )
 
 
-def validate(validators):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            user_id = kwargs["user_id"]
-            for validator in validators:
-                validator(user_id)
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
-def with_user(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        user_id = kwargs["user_id"]
-        user = User.query.filter_by(id=user_id).first()
-        if not user:
-            raise NotFoundError(f"No User exists with the ID {user_id}")
-        return func(*args, user=user)
-
-    return wrapper
-
-
 class UserDetail(Resource):
     def __init__(self):
         super().__init__()
         self.parser = self.__make_parser()
 
     @jwt_required
-    @validate([validate_uuid])
-    @with_user
+    @call_before([validate_uuid])
+    @get_resource(User)
     @marshal_with(UserMarshaller.all(), envelope="data")
     def get(self, user):
         return user
 
     @jwt_required
-    @validate([validate_uuid, validate_permissions])
-    @with_user
+    @call_before([validate_uuid, validate_permissions])
+    @get_resource(User)
     @marshal_with(UserMarshaller.all(), envelope="data")
     def patch(self, user):
         args = self.parser.parse_args()
@@ -79,8 +48,8 @@ class UserDetail(Resource):
         return user
 
     @jwt_required
-    @validate([validate_uuid, validate_permissions])
-    @with_user
+    @call_before([validate_uuid, validate_permissions])
+    @get_resource(User)
     def delete(self, user):
         DB.session.delete(user)
         DB.session.commit()
