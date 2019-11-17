@@ -9,6 +9,7 @@ from src.exceptions import BadRequestError
 from src.marshallers import TeamMarshaller
 from src.models import Team
 
+# pylint: disable=invalid-name
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.controllers,
@@ -31,7 +32,8 @@ def test_team_list_get_without_auth(client):
 def test_team_list_get_with_invalid_auth(client):
     """
     WHEN a get request is made to `/teams` with an invalid token in the `authorization` header
-    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    THEN the response should have a 422 status code and indicate that the authorization header
+    is malformed
     """
 
     response = client.get("/teams", headers=dict(authorization="abcdefg"))
@@ -78,7 +80,8 @@ def test_team_list_post_without_auth(client):
 def test_team_list_post_with_invalid_auth(client):
     """
     WHEN a post request is made to `/teams` with an invalid token in the `authorization` header
-    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    THEN the response should have a 422 status code and indicate that the authorization header
+    is malformed
     """
 
     response = client.post(
@@ -114,7 +117,8 @@ def test_team_list_post_missing_parameters(client):
 def test_team_list_post_no_team_members(client):
     """
     WHEN a post request is made to `/teams` with no user ids in the `team_members` parameter
-    THEN the response should have a 400 status code and indicate that at least one team member is required
+    THEN the response should have a 400 status code and indicate that at least one team member is
+    required
     """
 
     response = client.post(
@@ -132,8 +136,10 @@ def test_team_list_post_no_team_members(client):
 
 def test_team_list_post_invalid_team_members(client):
     """
-    WHEN a post request is made to `/teams` with an id in the `team_members` parameter for a non-existant user
-    THEN the response should have a 400 status code and indicate that the user with the id does not exist
+    WHEN a post request is made to `/teams` with an id in the `team_members` parameter for a
+    non-existant user
+    THEN the response should have a 400 status code and indicate that the user with the id does not
+    exist
     """
 
     user_id = str(uuid.uuid4())

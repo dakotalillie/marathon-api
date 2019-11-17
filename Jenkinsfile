@@ -9,6 +9,11 @@ pipeline {
                 sleep(5)
             }
         }
+        stage('Formatting') {
+            steps {
+                sh 'make black -- --check'
+            }
+        }
         stage('Lint') {
             steps {
                 sh 'make lint'

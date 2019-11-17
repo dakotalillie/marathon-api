@@ -1,5 +1,7 @@
 from flask_restful import fields
 
+from .common import COMMON_FIELDS
+
 
 class UserMarshaller:
     """
@@ -7,15 +9,12 @@ class UserMarshaller:
     """
 
     __fields = dict(
-        id=fields.String,
+        **COMMON_FIELDS,
         first_name=fields.String,
         last_name=fields.String,
         username=fields.String,
         email=fields.String,
         visibility=fields.String,
-        created_at=fields.DateTime(dt_format="iso8601"),
-        updated_at=fields.DateTime(dt_format="iso8601"),
-        is_active=fields.Boolean,
     )
 
     @classmethod

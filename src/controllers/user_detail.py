@@ -22,16 +22,24 @@ def validate_permissions(*args, user_id):
         )
 
 
+def make_parser():
+    parser = reqparse.RequestParser()
+    for key in ("first_name", "last_name", "username", "email", "password"):
+        parser.add_argument(name=key, type=str, nullable=False, location="form")
+    return parser
+
+
 class UserDetail(Resource):
     def __init__(self):
         super().__init__()
-        self.parser = self.__make_parser()
+        self.parser = make_parser()
 
     @jwt_required
     @call_before([validate_uuid])
     @get_resource(User)
     @marshal_with(UserMarshaller.all(), envelope="data")
     def get(self, user):
+        # pylint: disable=no-self-use
         return user
 
     @jwt_required
@@ -51,12 +59,7 @@ class UserDetail(Resource):
     @call_before([validate_uuid, validate_permissions])
     @get_resource(User)
     def delete(self, user):
+        # pylint: disable=no-self-use
         DB.session.delete(user)
         DB.session.commit()
         return None, 204
-
-    def __make_parser(self):
-        parser = reqparse.RequestParser()
-        for key in ("first_name", "last_name", "username", "email", "password"):
-            parser.add_argument(name=key, type=str, nullable=False, location="form")
-        return parser

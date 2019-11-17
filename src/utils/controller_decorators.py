@@ -53,4 +53,3 @@ def get_resource(model):
         return wrapper
 
     return decorator
-
