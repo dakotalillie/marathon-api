@@ -2,7 +2,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
 
-TeamMembers = DB.Table(
+TEAM_MEMBERS = DB.Table(
     "users_teams",
     DB.Column(
         "user_id", UUID(as_uuid=False), DB.ForeignKey("users.id"), nullable=False

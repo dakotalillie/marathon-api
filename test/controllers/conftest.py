@@ -24,6 +24,7 @@ def client(app):
 
 @pytest.fixture
 def user1(app):
+    # pylint: disable=unused-argument
     user = User(
         first_name="First",
         last_name="Last",
@@ -38,6 +39,7 @@ def user1(app):
 
 @pytest.fixture
 def user2(app):
+    # pylint: disable=unused-argument
     user = User(
         first_name="user2 first name",
         last_name="user2 last name",
@@ -52,8 +54,8 @@ def user2(app):
 
 @pytest.fixture
 def team1(app):
+    # pylint: disable=unused-argument
     team = Team(name="team1")
     DB.session.add(team)
     DB.session.commit()
     yield team
-

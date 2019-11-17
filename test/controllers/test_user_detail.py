@@ -9,6 +9,7 @@ from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import User
 from src.marshallers import UserMarshaller
 
+# pylint: disable=invalid-name
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.controllers,
@@ -30,8 +31,10 @@ def test_user_detail_get_without_auth(client):
 
 def test_user_detail_get_with_invalid_auth(client):
     """
-    WHEN a get request is made to `/users/<user_id>` with an invalid token in the `authorization` header
-    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    WHEN a get request is made to `/users/<user_id>` with an invalid token in the `authorization`
+    header
+    THEN the response should have a 422 status code and indicate that the authorization header is
+    malformed
     """
 
     response = client.get("/users/abcdefg", headers=dict(authorization="abcdefg"))
@@ -44,7 +47,8 @@ def test_user_detail_get_with_invalid_auth(client):
 def test_user_detail_get_non_uuid(client, user1):
     """
     WHEN a get request is made to `/users/<user_id>` but the user ID is not a valid UUID
-    THEN the response should have a 400 status and indicate that the provided user ID is not a valid UUID
+    THEN the response should have a 400 status and indicate that the provided user ID is not a valid
+    UUID
     """
 
     response = client.get(
@@ -106,8 +110,10 @@ def test_user_detail_patch_without_auth(client):
 
 def test_user_detail_patch_with_invalid_auth(client):
     """
-    WHEN a patch request is made to `/users/<user_id>` with an invalid token in the `authorization` header
-    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    WHEN a patch request is made to `/users/<user_id>` with an invalid token in the `authorization`
+    header
+    THEN the response should have a 422 status code and indicate that the authorization header is
+    malformed
     """
 
     response = client.patch("/users/abcdefg", headers=dict(authorization="abcdefg"))
@@ -120,7 +126,8 @@ def test_user_detail_patch_with_invalid_auth(client):
 def test_user_detail_patch_non_uuid(client, user1):
     """
     WHEN a patch request is made to `/users/<user_id>` but the user ID is not a valid UUID
-    THEN the response should have a 400 status and indicate that the provided user ID is not a valid UUID
+    THEN the response should have a 400 status and indicate that the provided user ID is not a valid
+    UUID
     """
 
     response = client.patch(
@@ -154,7 +161,8 @@ def test_user_detail_patch_nonexistent(client):
 
 def test_user_detail_patch_different_user(client, user1, user2):
     """
-    WHEN a patch request is made to `/users/<user_id>` with a token for a different user than the one in the URI
+    WHEN a patch request is made to `/users/<user_id>` with a token for a different user than the
+    one in the URI
     THEN the response should have a 403 status code and indicate that the operation is forbidden
     """
 
@@ -194,7 +202,8 @@ def test_user_detail_patch_success(client, user1):
 
 def test_user_detail_delete_without_auth(client, user1):
     """
-    WHEN a delete request is made to `/users/<user_id>` without a token in the `authorization` header
+    WHEN a delete request is made to `/users/<user_id>` without a token in the `authorization`
+    header
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
@@ -207,8 +216,10 @@ def test_user_detail_delete_without_auth(client, user1):
 
 def test_user_detail_delete_with_invalid_auth(client, user1):
     """
-    WHEN a delete request is made to `/users/<user_id>` with an invalid token in the `authorization` header
-    THEN the response should have a 422 status code and indicate that the authorization header is malformed
+    WHEN a delete request is made to `/users/<user_id>` with an invalid token in the `authorization`
+    header
+    THEN the response should have a 422 status code and indicate that the authorization header is
+    malformed
     """
 
     response = client.delete(
@@ -223,7 +234,8 @@ def test_user_detail_delete_with_invalid_auth(client, user1):
 def test_user_detail_delete_non_uuid(client, user1):
     """
     WHEN a delete request is made to `/users/<user_id>` but the user ID is not a valid UUID
-    THEN the response should have a 400 status and indicate that the provided user ID is not a valid UUID
+    THEN the response should have a 400 status and indicate that the provided user ID is not a valid
+    UUID
     """
 
     response = client.delete(
@@ -255,7 +267,8 @@ def test_user_detail_delete_nonexistent(client):
 
 def test_user_detail_delete_different_user(client, user1, user2):
     """
-    WHEN a delete request is made to `/users/<user_id>` with a token for a different user than the one in the URI
+    WHEN a delete request is made to `/users/<user_id>` with a token for a different user than the
+    one in the URI
     THEN the response should have a 403 status code and indicate that the operation is forbidden
     """
 
@@ -285,4 +298,4 @@ def test_user_detail_delete_success(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 204
-    assert len(response.data) is 0
+    assert len(response.data) == 0

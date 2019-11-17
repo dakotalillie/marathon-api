@@ -3,7 +3,7 @@ import bcrypt
 from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
-from .users_teams import TeamMembers
+from .users_teams import TEAM_MEMBERS
 
 
 class User(DB.Model):
@@ -23,7 +23,7 @@ class User(DB.Model):
     is_active = DB.Column(DB.Boolean, server_default="true")
     teams = DB.relationship(
         "Team",
-        secondary=TeamMembers,
+        secondary=TEAM_MEMBERS,
         lazy="subquery",
         backref=DB.backref("users", lazy=True),
     )

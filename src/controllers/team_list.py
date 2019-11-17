@@ -7,14 +7,28 @@ from ..marshallers import TeamMarshaller
 from ..models import Team, User
 
 
+def make_parser():
+    parser = reqparse.RequestParser()
+    parser.add_argument(name="name", required=True, nullable=False, location="form")
+    parser.add_argument(
+        name="team_members",
+        required=True,
+        nullable=False,
+        location="form",
+        action="append",
+    )
+    return parser
+
+
 class TeamList(Resource):
     def __init__(self):
         super().__init__()
-        self.parser = self.__make_parser()
+        self.parser = make_parser()
 
     @jwt_required
     @marshal_with(TeamMarshaller.all(), envelope="data")
     def get(self):
+        # pylint: disable=no-self-use
         return Team.query.all()
 
     @jwt_required
@@ -30,15 +44,3 @@ class TeamList(Resource):
         DB.session.add(team)
         DB.session.commit()
         return team, 201
-
-    def __make_parser(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="name", required=True, nullable=False, location="form")
-        parser.add_argument(
-            name="team_members",
-            required=True,
-            nullable=False,
-            location="form",
-            action="append",
-        )
-        return parser

@@ -7,4 +7,3 @@ class BadRequestError(Exception):
 
     def to_dict(self):
         return dict(title="Bad Request", status=400, detail=self.message)
-

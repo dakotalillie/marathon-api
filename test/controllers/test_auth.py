@@ -3,6 +3,7 @@ import pytest
 
 from src.exceptions import BadRequestError
 
+# pylint: disable=invalid-name
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.controllers,

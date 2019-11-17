@@ -4,7 +4,7 @@ from uuid import UUID
 def is_valid_uuid(uuid_to_test, version=4):
     """
     Stolen from:
-    https://stackoverflow.com/questions/19989481/how-to-determine-if-a-string-is-a-valid-v4-uuid 
+    https://stackoverflow.com/questions/19989481/how-to-determine-if-a-string-is-a-valid-v4-uuid
 
     Check if uuid_to_test is a valid UUID.
 
