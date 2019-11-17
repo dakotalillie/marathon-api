@@ -3,18 +3,12 @@ import bcrypt
 from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
+from .users_teams import TeamMembers
 
 
 class User(DB.Model):
-    """
-    A class which is used for interacting with the `users` table in the database
-    """
-
     __tablename__ = "users"
 
-    """
-    Table Columns
-    """
     id = DB.Column(
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
@@ -27,6 +21,12 @@ class User(DB.Model):
     created_at = DB.Column(DB.DateTime, server_default="now")
     updated_at = DB.Column(DB.DateTime, server_default="now")
     is_active = DB.Column(DB.Boolean, server_default="true")
+    teams = DB.relationship(
+        "Team",
+        secondary=TeamMembers,
+        lazy="subquery",
+        backref=DB.backref("users", lazy=True),
+    )
 
     @property
     def password(self):
