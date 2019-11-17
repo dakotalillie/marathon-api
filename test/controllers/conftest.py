@@ -2,7 +2,7 @@ import pytest
 
 from src.app import create_app
 from src.db import DB
-from src.models import User
+from src.models import User, Team
 
 
 @pytest.fixture(name="app")
@@ -48,3 +48,12 @@ def user2(app):
     DB.session.add(user)
     DB.session.commit()
     yield user
+
+
+@pytest.fixture
+def team1(app):
+    team = Team(name="team1")
+    DB.session.add(team)
+    DB.session.commit()
+    yield team
+

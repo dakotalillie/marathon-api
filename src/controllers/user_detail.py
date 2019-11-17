@@ -9,12 +9,12 @@ from ..utils.is_valid_uuid import is_valid_uuid
 from ..utils.controller_decorators import call_before, get_resource
 
 
-def validate_uuid(user_id):
+def validate_uuid(*args, user_id):
     if not is_valid_uuid(user_id):
         raise BadRequestError(f"User ID {user_id} is not a valid UUID")
 
 
-def validate_permissions(user_id):
+def validate_permissions(*args, user_id):
     current_user_id = get_jwt_identity()
     if user_id != current_user_id:
         raise ForbiddenError(

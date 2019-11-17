@@ -3,9 +3,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from .controllers.auth import Auth
-from .controllers.user_list import UserList
-from .controllers.user_detail import UserDetail
+from .controllers import Auth, TeamList, UserList, UserDetail
 from .db import DB
 from .exceptions import BadRequestError, ConflictError, ForbiddenError, NotFoundError
 
@@ -21,6 +19,7 @@ def setup_db(app, db_user, db_password, db_host, db_port, db_name):
 def setup_api(app):
     api = Api(app)
     api.add_resource(Auth, "/auth")
+    api.add_resource(TeamList, "/teams")
     api.add_resource(UserList, "/users")
     api.add_resource(UserDetail, "/users/<user_id>")
 

@@ -23,7 +23,7 @@ def call_before(callbacks):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             for callback in callbacks:
-                callback(**kwargs)
+                callback(*args, **kwargs)
             return func(*args, **kwargs)
 
         return wrapper
