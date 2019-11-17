@@ -1,4 +1,6 @@
 import os
+from operator import itemgetter
+
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -8,10 +10,13 @@ from .db import DB
 from .exceptions import BadRequestError, ConflictError, ForbiddenError, NotFoundError
 
 
-def setup_db(app, db_user, db_password, db_host, db_port, db_name):
+def setup_db(app, db_params):
+    user, password, host, port, name = itemgetter(
+        "user", "password", "host", "port", "name"
+    )(db_params)
     app.config[
         "SQLALCHEMY_DATABASE_URI"
-    ] = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    ] = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     DB.init_app(app)
 
@@ -25,6 +30,7 @@ def setup_api(app):
 
 
 def setup_jwt(app):
+    # pylint: disable=unused-variable
     app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
     jwt = JWTManager(app)
 
@@ -38,6 +44,7 @@ def setup_jwt(app):
 
 
 def setup_error_handling(app):
+    # pylint: disable=unused-variable
     app.config["BUNDLE_ERRORS"] = True
 
     @app.errorhandler(BadRequestError)
@@ -56,7 +63,12 @@ def create_app(
     db_name=os.getenv("DB_NAME"),
 ):
     app = Flask(__name__)
-    setup_db(app, db_user, db_password, db_host, db_port, db_name)
+    setup_db(
+        app,
+        dict(
+            user=db_user, password=db_password, host=db_host, port=db_port, name=db_name
+        ),
+    )
     setup_api(app)
     setup_jwt(app)
     setup_error_handling(app)

@@ -9,6 +9,11 @@ pipeline {
                 sleep(5)
             }
         }
+        stage('Lint') {
+            steps {
+                sh 'make lint'
+            }
+        }
         stage('Test') {
             steps {
                 sh 'make tests'
