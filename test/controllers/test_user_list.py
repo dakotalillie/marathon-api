@@ -106,6 +106,7 @@ def test_user_list_post_duplicate_username(client, user1):
     WHEN a post request is made to `/users` with the same username as that user
     THEN the response should have a 409 status code and indicate that the user already exists
     """
+
     response = client.post(
         "/users",
         data=dict(
@@ -131,6 +132,7 @@ def test_user_list_post_success(client):
     WHEN a post request is made to `/users` with valid parameters
     THEN the response should have a 201 status code and return the data for the newly created user
     """
+
     response = client.post(
         "/users",
         data=dict(
