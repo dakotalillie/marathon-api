@@ -28,6 +28,7 @@ py==1.8.0
 pycparser==2.19
 PyJWT==1.7.1
 pylint==2.4.3
+pylint-flask==0.6
 pylint-flask-sqlalchemy==0.1.0
 pylint-plugin-utils==0.6
 pyparsing==2.4.5

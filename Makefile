@@ -1,4 +1,4 @@
-.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, db-shell
+.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, db-shell, lint
 
 ARGS=$(filter-out $@,$(MAKECMDGOALS))
 DOCKER_COMPOSE_DEV=docker-compose -f docker/docker-compose.dev.yml
@@ -21,6 +21,9 @@ tests:
 
 db-shell:
 	docker exec -itu postgres postgres psql
+
+lint:
+	docker exec marathon-api pylint **/*.py $(ARGS)
 
 # this is necessary for $(ARGS) to work
 %:
