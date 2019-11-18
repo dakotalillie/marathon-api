@@ -25,7 +25,7 @@ def validate_permissions(*args, user_id):
 def make_parser():
     parser = reqparse.RequestParser()
     for key in ("first_name", "last_name", "username", "email", "password"):
-        parser.add_argument(name=key, type=str, nullable=False, location="form")
+        parser.add_argument(name=key, nullable=False, location="form")
     return parser
 
 
