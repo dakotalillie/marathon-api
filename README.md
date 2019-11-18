@@ -2,20 +2,28 @@
 
 _This repo is a work in progress_
 
-Marathon will be a task-managing app, similar to Jira or Trello. This is a practice project for me to refamiliarize myself with backend development after spending my days at work as a frontend developer.
+Marathon is a task-managing app, similar to Jira or Trello. This is a practice project for me to refamiliarize myself with backend development after spending my days at work as a frontend developer.
 
-Currently, all that's up and running is JWT authentication and CRUD for the User resource. It's basic, but I'm focusing on quality over quantity &mdash; I want to make sure the code is well structured and tested before expanding the functionality. You can see some of the tasks I have planned on the [Kanban Project board](https://github.com/dakotalillie/marathon-api/projects/1).
+Features currently up and running:
+
+-   JWT authentication
+-   CRUD for the User resource
+-   CRUD for the Team resource
+-   CI via Jenkins
+
+More features are on the way &mdash; you can see some of the tasks I have planned on the [Kanban Project board](https://github.com/dakotalillie/marathon-api/projects/1).
 
 ## Tech Stack
 
 This app is built using:
 
--   Python >= 3.6
+-   Python 3.8
 -   Flask
 -   SQLAlchemy
 -   PostgreSQL
 -   Docker
 -   Swagger
+-   Jenkins
 
 The code is linted using pylint, formatted using black, and tested using pytest.
 
@@ -41,7 +49,7 @@ This will build the image for the app locally and start the following containers
 -   A swagger UI server, running on port 8080
 -   A postgres server, running on port 5432
 
-Note that the swagger UI docs were mostly using for endpoint planning and mapping out a crude domain model. They are not currently up to date, though I intend on updating them once more of the core functionality is in place.
+(The swagger UI docs were mostly using for endpoint planning and mapping out a crude domain model. They are not currently up to date, though I intend on updating them soon.)
 
 To stop the containers, you can run:
 
