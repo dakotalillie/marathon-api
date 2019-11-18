@@ -290,7 +290,7 @@ def test_user_detail_delete_success(client, user1):
     """
     GIVEN an existing user on the platform
     WHEN a delete request is made to `/users/<user_id>` with the user's ID
-    THEN the response should have a 204 status code
+    THEN the user should be removed from the database and the response should have a 204 status code
     """
 
     response = client.delete(
@@ -298,4 +298,5 @@ def test_user_detail_delete_success(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 204
+    assert User.query.filter_by(id=user1.id).first() is None
     assert len(response.data) == 0

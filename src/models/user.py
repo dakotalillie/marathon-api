@@ -3,7 +3,7 @@ import bcrypt
 from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
-from .users_teams import TEAM_MEMBERS
+from .team_members import TEAM_MEMBERS
 
 
 class User(DB.Model):

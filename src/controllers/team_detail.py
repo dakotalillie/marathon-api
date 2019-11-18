@@ -14,7 +14,7 @@ def validate_uuid(*args, team_id):
         raise BadRequestError(f"Team ID {team_id} is not a valid UUID")
 
 
-def validate_permissions(*arms, team):
+def validate_permissions(*args, team):
     current_user_id = get_jwt_identity()
     current_user = User.query.filter_by(id=current_user_id).first()
     if (not current_user) or (current_user not in team.users):
@@ -55,3 +55,13 @@ class TeamDetail(Resource):
         DB.session.add(team)
         DB.session.commit()
         return team
+
+    @jwt_required
+    @call_before([validate_uuid])
+    @get_resource(Team)
+    @call_before([validate_permissions])
+    def delete(self, team):
+        # pylint: disable=no-self-use
+        DB.session.delete(team)
+        DB.session.commit()
+        return None, 204
