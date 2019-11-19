@@ -32,7 +32,7 @@ def get_team(team_id):
     return team
 
 
-class TeamMember(Resource):
+class TeamMembershipList(Resource):
     def __init__(self):
         super().__init__()
         self.parser = make_parser()
