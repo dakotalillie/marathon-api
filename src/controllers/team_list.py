@@ -40,7 +40,7 @@ class TeamList(Resource):
             user = User.query.filter_by(id=user_id).first()
             if not user:
                 raise BadRequestError(f"User with id {user_id} does not exist")
-            team.users.append(user)
+            team.members.append(user)
         DB.session.add(team)
         DB.session.commit()
         return team, 201

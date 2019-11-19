@@ -17,7 +17,7 @@ def validate_uuid(*args, team_id):
 def validate_permissions(*args, team):
     current_user_id = get_jwt_identity()
     current_user = User.query.filter_by(id=current_user_id).first()
-    if (not current_user) or (current_user not in team.users):
+    if (not current_user) or (current_user not in team.members):
         raise ForbiddenError(
             f"User {current_user_id} cannot modify team {team.id} because they are not a member"
         )

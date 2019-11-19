@@ -210,7 +210,7 @@ def test_team_detail_patch_success(client, user1, team1):
     THEN the response should have a 200 status and return the updated details of the team
     """
 
-    team1.users.append(user1)
+    team1.members.append(user1)
     DB.session.add(team1)
     DB.session.commit()
 
@@ -325,7 +325,7 @@ def test_team_detail_delete_success(client, user1, team1):
     THEN the team should be removed from the database and the response should have a 204 status
     """
 
-    team1.users.append(user1)
+    team1.members.append(user1)
     DB.session.add(team1)
     DB.session.commit()
 
