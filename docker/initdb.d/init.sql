@@ -23,13 +23,14 @@ CREATE TABLE teams (
     is_active  BOOLEAN     NOT NULL DEFAULT true
 );
 
-CREATE TABLE users_teams (
+CREATE TABLE team_memberships (
+    id          UUID      PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id     UUID      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     team_id     UUID      NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_active   BOOLEAN   NOT NULL DEFAULT true,
-    PRIMARY KEY (user_id,team_id)
+    UNIQUE (user_id,team_id)
 );
 
 CREATE TABLE boards (
