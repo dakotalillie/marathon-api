@@ -30,7 +30,7 @@ CREATE TABLE team_memberships (
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_active   BOOLEAN   NOT NULL DEFAULT true,
-    PRIMARY KEY (user_id,team_id)
+    UNIQUE (user_id,team_id)
 );
 
 CREATE TABLE boards (
