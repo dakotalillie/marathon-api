@@ -25,7 +25,7 @@ class User(DB.Model):
         "Team",
         secondary=TEAM_MEMBERS,
         lazy="subquery",
-        backref=DB.backref("users", lazy=True),
+        backref=DB.backref("members", lazy=True),
     )
 
     @property
