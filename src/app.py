@@ -9,6 +9,7 @@ from .controllers import (
     Auth,
     TeamDetail,
     TeamList,
+    TeamMembershipDetail,
     TeamMembershipList,
     UserList,
     UserDetail,
@@ -34,6 +35,7 @@ def setup_api(app):
     api.add_resource(TeamList, "/teams")
     api.add_resource(TeamDetail, "/teams/<team_id>")
     api.add_resource(TeamMembershipList, "/team_memberships")
+    api.add_resource(TeamMembershipDetail, "/team_memberships/<team_membership_id>")
     api.add_resource(UserList, "/users")
     api.add_resource(UserDetail, "/users/<user_id>")
 

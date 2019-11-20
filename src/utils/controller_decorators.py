@@ -5,6 +5,7 @@ common functionality.
 
 import functools
 
+from .string_transformations import camel_to_snake
 from ..exceptions import NotFoundError
 
 
@@ -39,16 +40,16 @@ def get_resource(model):
     """
 
     model_name = model.__name__
-    id_field = f"{model_name.lower()}_id"
+    snake_case_model_name = camel_to_snake(model_name)
 
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            resource_id = kwargs[id_field]
+            resource_id = kwargs[f"{snake_case_model_name}_id"]
             resource = model.query.filter_by(id=resource_id).first()
             if not resource:
                 raise NotFoundError(f"No {model_name} exists with the ID {resource_id}")
-            return func(*args, **dict(zip((model_name.lower(),), (resource,))))
+            return func(*args, **dict(zip((snake_case_model_name,), (resource,))))
 
         return wrapper
 
