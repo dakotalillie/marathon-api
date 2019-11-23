@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required
 
 from ..db import DB
 from ..exceptions import BadRequestError
-from ..marshallers import TeamMarshaller
 from ..models import Team, User
 
 
@@ -26,13 +25,13 @@ class TeamList(Resource):
         self.parser = make_parser()
 
     @jwt_required
-    @marshal_with(TeamMarshaller.all(), envelope="data")
+    @marshal_with(Team.marshaller.all(), envelope="data")
     def get(self):
         # pylint: disable=no-self-use
         return Team.query.all()
 
     @jwt_required
-    @marshal_with(TeamMarshaller.all(), envelope="data")
+    @marshal_with(Team.marshaller.all(), envelope="data")
     def post(self):
         args = self.parser.parse_args()
         team = Team(name=args.get("name"))

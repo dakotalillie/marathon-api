@@ -1,8 +1,12 @@
+from datetime import datetime
 import uuid
+
 import bcrypt
+from flask_restful import fields
 from sqlalchemy.dialects.postgresql import UUID
 
 from ..db import DB
+from ..utils.marshaller import CommonMarshaller
 
 
 class User(DB.Model):
@@ -11,20 +15,35 @@ class User(DB.Model):
     id = DB.Column(
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
+    created_at = DB.Column(DB.DateTime, default=datetime.utcnow)
+    updated_at = DB.Column(DB.DateTime, default=datetime.utcnow)
+    is_active = DB.Column(DB.Boolean, default=True)
     first_name = DB.Column(DB.String, nullable=False)
     last_name = DB.Column(DB.String, nullable=False)
     username = DB.Column(DB.String, nullable=False, unique=True)
     email = DB.Column(DB.String, nullable=False, unique=True)
     password_hash = DB.Column(DB.String, nullable=False)
     visibility = DB.Column(DB.String, server_default="public")
-    created_at = DB.Column(DB.DateTime, server_default="now")
-    updated_at = DB.Column(DB.DateTime, server_default="now")
-    is_active = DB.Column(DB.Boolean, server_default="true")
+    team_memberships = DB.relationship(
+        "TeamMembership",
+        lazy="subquery",
+        backref=DB.backref("user", lazy=True),
+        viewonly=True,
+    )
     teams = DB.relationship(
         "Team",
         secondary="team_memberships",
         lazy="subquery",
         backref=DB.backref("members", lazy=True),
+    )
+    marshaller = CommonMarshaller(
+        {
+            "first_name": fields.String,
+            "last_name": fields.String,
+            "username": fields.String,
+            "email": fields.String,
+            "visibility": fields.String,
+        }
     )
 
     @property

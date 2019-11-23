@@ -4,9 +4,9 @@ from flask_jwt_extended import create_access_token
 from flask_restful import marshal
 import pytest
 
+from src.db import DB
 from src.exceptions import ConflictError
 from src.models import User
-from src.marshallers import UserMarshaller
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -42,20 +42,65 @@ def test_user_list_get_with_invalid_auth(client):
     )
 
 
-def test_user_list_get_success(client, user1):
+def test_user_list_get_success(client, user1, team1):
     """
     GIVEN there are existing users on the platform
     WHEN a get request is made to `/users` with valid authorization
     THEN the response should have a 200 status code and return a list of all users on the platform
     """
 
+    team1.members.append(user1)
+    DB.session.add(team1)
+    DB.session.commit()
+
     response = client.get(
         "/users",
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
+    team_membership = user1.team_memberships[0]
+
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": [dict(marshal(user1, UserMarshaller.all()))]
+        "links": {"self": "http://localhost/users"},
+        "data": [
+            {
+                "type": "users",
+                "id": user1.id,
+                "attributes": {
+                    "created_at": user1.created_at.isoformat(),
+                    "updated_at": user1.updated_at.isoformat(),
+                    "is_active": True,
+                    "first_name": user1.first_name,
+                    "last_name": user1.last_name,
+                    "username": user1.username,
+                    "email": user1.email,
+                    "visibility": user1.visibility,
+                },
+                "relationships": {
+                    "team_memberships": {
+                        "data": [{"type": "team_memberships", "id": team_membership.id}]
+                    },
+                    "teams": {"data": [{"type": "teams", "id": team1.id}]},
+                },
+                "links": {"self": f"http://localhost/users/{user1.id}"},
+            }
+        ],
+        "included": [
+            {
+                "type": "team_memberships",
+                "id": team_membership.id,
+                "attributes": {"user_id": user1.id, "team_id": team1.id},
+                "links": {
+                    "self": f"http://localhost/team_memberships/{team_membership.id}"
+                },
+            },
+            {
+                "type": "teams",
+                "id": team1.id,
+                "attributes": {"name": team1.name},
+                "links": {"self": f"http://localhost/teams/{team1.id}"},
+            },
+        ],
     }
 
 
@@ -148,5 +193,5 @@ def test_user_list_post_success(client):
     user = User.query.filter_by(username="username").first()
     assert response.status_code == 201
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user, UserMarshaller.all()))
+        "data": dict(marshal(user, User.marshaller.all()))
     }

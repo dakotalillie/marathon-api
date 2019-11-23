@@ -6,8 +6,8 @@ from sqlalchemy.exc import IntegrityError
 
 from ..db import DB
 from ..exceptions import ConflictError
-from ..models import User
-from ..marshallers import UserMarshaller
+from ..models import Team, TeamMembership, User
+from ..utils.controller_decorators import format_response
 
 
 def make_parser():
@@ -42,12 +42,24 @@ class UserList(Resource):
         self.parser = make_parser()
 
     @jwt_required
-    @marshal_with(UserMarshaller.all(), envelope="data")
+    @format_response(
+        {
+            "name": "users",
+            "marshaller": User.marshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembership.marshaller.pick("user_id", "team_id"),
+                },
+                {"name": "teams", "marshaller": Team.marshaller.pick("name"),},
+            ],
+        }
+    )
     def get(self):
         # pylint: disable=no-self-use
         return User.query.all()
 
-    @marshal_with(UserMarshaller.all(), envelope="data")
+    @marshal_with(User.marshaller.all(), envelope="data")
     def post(self):
         args = self.parser.parse_args()
         user = User(**args)
