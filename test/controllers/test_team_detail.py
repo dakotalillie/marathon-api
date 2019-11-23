@@ -7,7 +7,6 @@ import pytest
 
 from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
-from src.marshallers import TeamMarshaller
 from src.models import Team
 
 # pylint: disable=invalid-name
@@ -101,7 +100,7 @@ def test_team_detail_get_success(client, team1):
     )
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(team1, TeamMarshaller.all()))
+        "data": dict(marshal(team1, Team.marshaller.all()))
     }
 
 
@@ -222,7 +221,7 @@ def test_team_detail_patch_success(client, user1, team1):
     assert response.status_code == 200
     assert Team.query.filter_by(id=team1.id).first().name == "new team name"
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(team1, TeamMarshaller.all()))
+        "data": dict(marshal(team1, Team.marshaller.all()))
     }
 
 

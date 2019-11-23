@@ -6,7 +6,6 @@ from flask_restful import marshal
 import pytest
 
 from src.exceptions import BadRequestError
-from src.marshallers import TeamMarshaller
 from src.models import Team
 
 # pylint: disable=invalid-name
@@ -58,7 +57,7 @@ def test_team_list_get_success(client, team1):
     )
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": [dict(marshal(team1, TeamMarshaller.all()))]
+        "data": [dict(marshal(team1, Team.marshaller.all()))]
     }
 
 
@@ -170,5 +169,5 @@ def test_team_list_post_success(client, user1):
     team = Team.query.filter_by(name="team 1").first()
     assert response.status_code == 201
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(team, TeamMarshaller.all()))
+        "data": dict(marshal(team, Team.marshaller.all()))
     }

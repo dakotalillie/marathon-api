@@ -7,7 +7,6 @@ import pytest
 
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import User
-from src.marshallers import UserMarshaller
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -91,7 +90,7 @@ def test_user_detail_get_success(client, user1):
     )
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user1, UserMarshaller.all()))
+        "data": dict(marshal(user1, User.marshaller.all()))
     }
 
 
@@ -196,7 +195,7 @@ def test_user_detail_patch_success(client, user1):
     assert response.status_code == 200
     assert User.query.filter_by(id=user1.id).first().first_name == "updated_first"
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user1, UserMarshaller.all()))
+        "data": dict(marshal(user1, User.marshaller.all()))
     }
 
 

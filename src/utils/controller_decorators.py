@@ -5,6 +5,9 @@ common functionality.
 
 import functools
 
+from flask import request
+from flask_restful import marshal
+
 from .string_transformations import camel_to_snake
 from ..exceptions import NotFoundError
 
@@ -54,3 +57,128 @@ def get_resource(model):
         return wrapper
 
     return decorator
+
+
+def format_response(config):
+    """
+    Formats the resource(s) returned by a controller into a structure compliant with the JSON API
+    specification. More information on the JSON API standard can be found at https://jsonapi.org/
+
+    Parameters
+    ----------
+    config (dict): a configuration dict which allows for customization of the data included in the
+    response. A configuration MUST have the following propties:
+
+    - name (str) the name of the resource
+    - marshaller (Marshaller) the marshaller which determines which of the resource's properties
+      will be included
+
+    A top-level configuration MAY have the following properties:
+
+    - relationships(Config[]) an array of configuration dicts for resources which are related to
+      the primary resource.
+
+    Configuration objects contained within the "relationships" array MAY have the following
+    properties:
+
+    - related_name (name) the name of the resource as it relates to the primary resource, to be used
+      in cases where this differs from the ordinary name of the resource. For instance, a Team may
+      include Users, but it may access them as team.members instead of team.users.
+
+    Example
+    -------
+    @format_response(
+        {
+            "name": "teams",
+            "marshaller": TeamMarshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembershipMarshaller.pick("user_id", "team_id"),
+                },
+                {
+                    "related_name": "members",
+                    "name": "users",
+                    "marshaller": UserMarshaller.pick("name"),
+                },
+            ],
+        }
+    )
+    def get(self):
+        return Team.query.all()
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            resource_or_resource_list = func(*args, **kwargs)
+            return {
+                "links": {"self": request.url},
+                "data": _make_data(resource_or_resource_list, config),
+                **(
+                    {"included": _make_included(resource_or_resource_list, config)}
+                    if "relationships" in config
+                    else {}
+                ),
+            }
+
+        return wrapper
+
+    return decorator
+
+
+def _make_data(resource_or_resource_list, config):
+    return (
+        [
+            _make_resource_object(resource, config)
+            for resource in resource_or_resource_list
+        ]
+        if isinstance(resource_or_resource_list, list)
+        else _make_resource_object(resource_or_resource_list, config)
+    )
+
+
+def _make_resource_object(resource, config):
+    return {
+        "type": config["name"],
+        "id": resource.id,
+        "attributes": marshal(resource, config["marshaller"]),
+        "links": {"self": f"{request.host_url}{config['name']}/{resource.id}"},
+        **(_make_relationships(resource, config) if "relationships" in config else {}),
+    }
+
+
+def _make_relationships(resource, config):
+    relationships = [
+        _make_individual_relationship(resource, nested_config)
+        for nested_config in config["relationships"]
+    ]
+    return {"relationships": dict(i for r in relationships for i in r.items())}
+
+
+def _make_individual_relationship(resource, config):
+    return {
+        _get_related_name(config): {
+            "data": [
+                _make_id_resource_object(related_resource, config)
+                for related_resource in getattr(resource, _get_related_name(config))
+            ]
+        }
+    }
+
+
+def _get_related_name(config):
+    return config.get("related_name", config["name"])
+
+
+def _make_id_resource_object(resource, config):
+    return {"type": config["name"], "id": resource.id}
+
+
+def _make_included(resource_or_resource_list, config):
+    return [
+        _make_resource_object(related_resource, relationship)
+        for relationship in config["relationships"]
+        for resource in list(resource_or_resource_list)
+        for related_resource in getattr(resource, _get_related_name(relationship))
+    ]

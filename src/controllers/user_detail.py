@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..db import DB
 from ..exceptions import BadRequestError, ForbiddenError
 from ..models import User
-from ..marshallers import UserMarshaller
 from ..utils.is_valid_uuid import is_valid_uuid
 from ..utils.controller_decorators import call_before, get_resource
 
@@ -37,7 +36,7 @@ class UserDetail(Resource):
     @jwt_required
     @call_before([validate_uuid])
     @get_resource(User)
-    @marshal_with(UserMarshaller.all(), envelope="data")
+    @marshal_with(User.marshaller.all(), envelope="data")
     def get(self, user):
         # pylint: disable=no-self-use
         return user
@@ -45,7 +44,7 @@ class UserDetail(Resource):
     @jwt_required
     @call_before([validate_uuid, validate_permissions])
     @get_resource(User)
-    @marshal_with(UserMarshaller.all(), envelope="data")
+    @marshal_with(User.marshaller.all(), envelope="data")
     def patch(self, user):
         args = self.parser.parse_args()
         for key, value in args.items():
