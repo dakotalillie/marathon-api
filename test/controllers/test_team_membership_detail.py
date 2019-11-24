@@ -18,9 +18,15 @@ def test_team_memberships_detail_delete_without_auth(client):
 
     response = client.delete(f"/team_memberships/{str(uuid4())}")
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_team_memberships_detail_delete_with_invalid_auth(client):
@@ -35,9 +41,15 @@ def test_team_memberships_detail_delete_with_invalid_auth(client):
         f"/team_memberships/{str(uuid4())}", headers=dict(authorization="abcdefg")
     )
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_team_memberships_detail_delete_non_uuid(client):

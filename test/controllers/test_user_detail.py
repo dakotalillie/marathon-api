@@ -23,9 +23,15 @@ def test_user_detail_get_without_auth(client):
 
     response = client.get("/users/abcdefg")
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_user_detail_get_with_invalid_auth(client):
@@ -38,9 +44,15 @@ def test_user_detail_get_with_invalid_auth(client):
 
     response = client.get("/users/abcdefg", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_user_detail_get_non_uuid(client, user1):
@@ -157,9 +169,15 @@ def test_user_detail_patch_without_auth(client):
 
     response = client.patch("/users/abcdefg")
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_user_detail_patch_with_invalid_auth(client):
@@ -172,9 +190,15 @@ def test_user_detail_patch_with_invalid_auth(client):
 
     response = client.patch("/users/abcdefg", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_user_detail_patch_non_uuid(client, user1):
@@ -278,9 +302,15 @@ def test_user_detail_delete_without_auth(client, user1):
 
     response = client.delete(f"/users/{user1.id}")
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_user_detail_delete_with_invalid_auth(client, user1):
@@ -295,9 +325,15 @@ def test_user_detail_delete_with_invalid_auth(client, user1):
         f"/users/{user1.id}", headers=dict(authorization="abcdefg")
     )
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_user_detail_delete_non_uuid(client, user1):

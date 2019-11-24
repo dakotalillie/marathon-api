@@ -16,7 +16,15 @@ from .controllers import (
     UserDetail,
 )
 from .db import DB
-from .exceptions import BadRequestError, ConflictError, ForbiddenError, NotFoundError
+from .exceptions import (
+    make_error_response,
+    BadRequestError,
+    ConflictError,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+    UnprocessableEntityError,
+)
 
 
 def setup_db(app, db_params):
@@ -48,11 +56,11 @@ def setup_jwt(app):
 
     @jwt.unauthorized_loader
     def unauthorized(reason):
-        return dict(message=reason), 401
+        return make_error_response(UnauthorizedError(reason))
 
     @jwt.invalid_token_loader
     def invalid_token(reason):
-        return dict(message=reason), 422
+        return make_error_response(UnprocessableEntityError(reason))
 
 
 def setup_error_handling(app):
@@ -63,8 +71,9 @@ def setup_error_handling(app):
     @app.errorhandler(ConflictError)
     @app.errorhandler(ForbiddenError)
     @app.errorhandler(NotFoundError)
+    @app.errorhandler(UnauthorizedError)
     def handle_error(error):
-        return dict(errors=[error.to_dict()]), error.status_code
+        return make_error_response(error)
 
 
 def create_app(

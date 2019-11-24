@@ -1,3 +1,7 @@
+def make_error_response(error):
+    return dict(errors=[error.to_dict()]), error.status
+
+
 class ClientError(Exception):
     status = -1
     default_message = ""
@@ -13,24 +17,41 @@ class ClientError(Exception):
 
 
 class BadRequestError(ClientError):
-    status_code = 400
+    status = 400
     default_title = "Bad Request"
     default_message = "The requested operation could not be completed"
 
 
-class ConflictError(ClientError):
-    status_code = 409
-    default_title = "Conflict"
-    default_message = "The requested operation could not be completed due to a conflict"
+class UnauthorizedError(ClientError):
+    status = 401
+    default_title = "Unauthorized"
+    default_message = (
+        "The requested operation could not be completed due to missing or invalid"
+        "authorization"
+    )
 
 
 class ForbiddenError(ClientError):
-    status_code = 403
+    status = 403
     default_title = "Forbidden"
     default_message = "The requested operation is forbidden"
 
 
 class NotFoundError(ClientError):
-    status_code = 404
+    status = 404
     default_title = "Not Found"
     default_message = "The requested resource does not exist"
+
+
+class ConflictError(ClientError):
+    status = 409
+    default_title = "Conflict"
+    default_message = "The requested operation could not be completed due to a conflict"
+
+
+class UnprocessableEntityError(ClientError):
+    status = 422
+    default_title = "Unprocessable Entity"
+    default_message = (
+        "The requested operation could not be completed due to semantic errors"
+    )

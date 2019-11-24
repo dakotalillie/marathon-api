@@ -23,9 +23,15 @@ def test_team_list_get_without_auth(client):
 
     response = client.get("/teams")
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_team_list_get_with_invalid_auth(client):
@@ -37,9 +43,15 @@ def test_team_list_get_with_invalid_auth(client):
 
     response = client.get("/teams", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_team_list_get_success(client, user1, team1):
@@ -111,9 +123,15 @@ def test_team_list_post_without_auth(client):
         "/teams", data=dict(name="team 1", team_members=[str(uuid.uuid4())]),
     )
     assert response.status_code == 401
-    assert json.loads(response.data.decode()) == dict(
-        message="Missing Authorization Header"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 401,
+                "title": "Unauthorized",
+                "detail": "Missing Authorization Header",
+            }
+        ]
+    }
 
 
 def test_team_list_post_with_invalid_auth(client):
@@ -129,9 +147,15 @@ def test_team_list_post_with_invalid_auth(client):
         headers=dict(authorization="abcdefg"),
     )
     assert response.status_code == 422
-    assert json.loads(response.data.decode()) == dict(
-        message="Bad Authorization header. Expected value 'Bearer <JWT>'"
-    )
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 422,
+                "title": "Unprocessable Entity",
+                "detail": "Bad Authorization header. Expected value 'Bearer <JWT>'",
+            }
+        ]
+    }
 
 
 def test_team_list_post_missing_parameters(client):
