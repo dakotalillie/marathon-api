@@ -1,9 +1,10 @@
-from flask_restful import Resource, reqparse, marshal_with
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
 from ..db import DB
 from ..exceptions import BadRequestError
-from ..models import Team, User
+from ..models import Team, TeamMembership, User
+from ..utils.controller_decorators import format_response
 
 
 def make_parser():
@@ -25,13 +26,45 @@ class TeamList(Resource):
         self.parser = make_parser()
 
     @jwt_required
-    @marshal_with(Team.marshaller.all(), envelope="data")
+    @format_response(
+        {
+            "name": "teams",
+            "marshaller": Team.marshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembership.marshaller.pick("user_id", "team_id"),
+                },
+                {
+                    "name": "users",
+                    "related_name": "members",
+                    "marshaller": User.marshaller.pick("username"),
+                },
+            ],
+        }
+    )
     def get(self):
         # pylint: disable=no-self-use
         return Team.query.all()
 
     @jwt_required
-    @marshal_with(Team.marshaller.all(), envelope="data")
+    @format_response(
+        {
+            "name": "teams",
+            "marshaller": Team.marshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembership.marshaller.pick("user_id", "team_id"),
+                },
+                {
+                    "name": "users",
+                    "related_name": "members",
+                    "marshaller": User.marshaller.pick("username"),
+                },
+            ],
+        }
+    )
     def post(self):
         args = self.parser.parse_args()
         team = Team(name=args.get("name"))
