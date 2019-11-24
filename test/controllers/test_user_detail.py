@@ -2,7 +2,6 @@ import json
 import uuid
 
 from flask_jwt_extended import create_access_token
-from flask_restful import marshal
 import pytest
 
 from src.db import DB
@@ -251,7 +250,22 @@ def test_user_detail_patch_success(client, user1):
     assert response.status_code == 200
     assert User.query.filter_by(id=user1.id).first().first_name == "updated_first"
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user1, User.marshaller.all()))
+        "links": {"self": f"http://localhost/users/{user1.id}"},
+        "data": {
+            "type": "users",
+            "id": user1.id,
+            "attributes": {
+                "created_at": user1.created_at.isoformat(),
+                "updated_at": user1.updated_at.isoformat(),
+                "is_active": True,
+                "first_name": "updated_first",
+                "last_name": user1.last_name,
+                "username": user1.username,
+                "email": user1.email,
+                "visibility": user1.visibility,
+            },
+            "links": {"self": f"http://localhost/users/{user1.id}"},
+        },
     }
 
 

@@ -1,4 +1,4 @@
-.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, db-shell, lint, black
+.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, shell, db-shell, lint, black
 
 ARGS=$(filter-out $@,$(MAKECMDGOALS))
 DOCKER_COMPOSE_DEV=docker-compose -f docker/docker-compose.dev.yml
@@ -19,6 +19,9 @@ stop-ci:
 
 tests:
 	docker exec marathon-api python -m pytest $(ARGS)
+
+shell:
+	docker exec -it marathon-api bash $(ARGS)
 
 db-shell:
 	docker exec -itu postgres postgres psql

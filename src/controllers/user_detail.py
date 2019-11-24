@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse, marshal_with
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
@@ -56,7 +56,9 @@ class UserDetail(Resource):
     @jwt_required
     @call_before([validate_uuid, validate_permissions])
     @get_resource(User)
-    @marshal_with(User.marshaller.all(), envelope="data")
+    @format_response(
+        {"name": "users", "marshaller": User.marshaller.omit("id"),}
+    )
     def patch(self, user):
         args = self.parser.parse_args()
         for key, value in args.items():
