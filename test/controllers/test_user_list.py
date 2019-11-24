@@ -1,7 +1,6 @@
 import json
 
 from flask_jwt_extended import create_access_token
-from flask_restful import marshal
 import pytest
 
 from src.db import DB
@@ -193,5 +192,20 @@ def test_user_list_post_success(client):
     user = User.query.filter_by(username="username").first()
     assert response.status_code == 201
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user, User.marshaller.all()))
+        "links": {"self": "http://localhost/users"},
+        "data": {
+            "type": "users",
+            "id": user.id,
+            "attributes": {
+                "created_at": user.created_at.isoformat(),
+                "updated_at": user.updated_at.isoformat(),
+                "is_active": True,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "username": user.username,
+                "email": user.email,
+                "visibility": user.visibility,
+            },
+            "links": {"self": f"http://localhost/users/{user.id}"},
+        },
     }

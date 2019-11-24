@@ -1,6 +1,6 @@
 import re
 
-from flask_restful import Resource, reqparse, marshal_with
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
@@ -59,7 +59,7 @@ class UserList(Resource):
         # pylint: disable=no-self-use
         return User.query.all()
 
-    @marshal_with(User.marshaller.all(), envelope="data")
+    @format_response({"name": "users", "marshaller": User.marshaller.omit("id")})
     def post(self):
         args = self.parser.parse_args()
         user = User(**args)
