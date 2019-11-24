@@ -1,4 +1,5 @@
-.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, shell, db-shell, lint, black
+.PHONY: start-dev, stop-dev, start-ci, stop-ci, tests, shell, db-shell, db-migrate, db-upgrade,\
+	db-downgrade, lint, black
 
 ARGS=$(filter-out $@,$(MAKECMDGOALS))
 DOCKER_COMPOSE_DEV=docker-compose -f docker/docker-compose.dev.yml
@@ -25,6 +26,15 @@ shell:
 
 db-shell:
 	docker exec -itu postgres postgres psql
+
+db-migrate:
+	docker exec marathon-api flask db migrate $(ARGS)
+
+db-upgrade:
+	docker exec marathon-api flask db upgrade $(ARGS)
+
+db-downgrade:
+	docker exec marathon-api flask db downgrade $(ARGS)
 
 lint:
 	docker exec marathon-api pylint --load-plugins pylint_flask,pylint_flask_sqlalchemy $(TARGET_DIRS) $(ARGS)
