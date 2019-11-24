@@ -192,6 +192,10 @@ def _make_included(resource_or_resource_list, config):
     return [
         _make_resource_object(related_resource, relationship)
         for relationship in config["relationships"]
-        for resource in list(resource_or_resource_list)
+        for resource in (
+            resource_or_resource_list
+            if isinstance(resource_or_resource_list, list)
+            else [resource_or_resource_list]
+        )
         for related_resource in getattr(resource, _get_related_name(relationship))
     ]

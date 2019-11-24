@@ -12,8 +12,6 @@ class Marshaller:
         return {k: v for k, v in self.__fields.items() if k in properties}
 
     def omit(self, *properties):
-        print(self.__fields)
-        print("HI")
         return {k: v for k, v in self.__fields.items() if k not in properties}
 
 
