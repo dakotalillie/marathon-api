@@ -2,9 +2,9 @@ import json
 import uuid
 
 from flask_jwt_extended import create_access_token
-from flask_restful import marshal
 import pytest
 
+from src.db import DB
 from src.exceptions import BadRequestError
 from src.models import Team
 
@@ -42,12 +42,16 @@ def test_team_list_get_with_invalid_auth(client):
     )
 
 
-def test_team_list_get_success(client, team1):
+def test_team_list_get_success(client, user1, team1):
     """
     GIVEN there are existing teams on the platform
     WHEN a get request is made to `/teams` with valid authorization
     THEN the response should have a 200 status code and return a list of all users on the platform
     """
+
+    team1.members.append(user1)
+    DB.session.add(team1)
+    DB.session.commit()
 
     response = client.get(
         "/teams",
@@ -55,9 +59,45 @@ def test_team_list_get_success(client, team1):
             authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
         ),
     )
+    team_membership = user1.team_memberships[0]
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": [dict(marshal(team1, Team.marshaller.all()))]
+        "links": {"self": "http://localhost/teams"},
+        "data": [
+            {
+                "type": "teams",
+                "id": team1.id,
+                "attributes": {
+                    "created_at": team1.created_at.isoformat(),
+                    "updated_at": team1.updated_at.isoformat(),
+                    "is_active": True,
+                    "name": team1.name,
+                },
+                "relationships": {
+                    "team_memberships": {
+                        "data": [{"type": "team_memberships", "id": team_membership.id}]
+                    },
+                    "members": {"data": [{"type": "users", "id": user1.id}]},
+                },
+                "links": {"self": f"http://localhost/teams/{team1.id}"},
+            }
+        ],
+        "included": [
+            {
+                "type": "team_memberships",
+                "id": team_membership.id,
+                "attributes": {"user_id": user1.id, "team_id": team1.id},
+                "links": {
+                    "self": f"http://localhost/team_memberships/{team_membership.id}"
+                },
+            },
+            {
+                "type": "users",
+                "id": user1.id,
+                "attributes": {"username": user1.username},
+                "links": {"self": f"http://localhost/users/{user1.id}"},
+            },
+        ],
     }
 
 
@@ -167,7 +207,41 @@ def test_team_list_post_success(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     team = Team.query.filter_by(name="team 1").first()
+    team_membership = user1.team_memberships[0]
     assert response.status_code == 201
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(team, Team.marshaller.all()))
+        "links": {"self": "http://localhost/teams"},
+        "data": {
+            "type": "teams",
+            "id": team.id,
+            "attributes": {
+                "created_at": team.created_at.isoformat(),
+                "updated_at": team.updated_at.isoformat(),
+                "is_active": True,
+                "name": team.name,
+            },
+            "relationships": {
+                "team_memberships": {
+                    "data": [{"type": "team_memberships", "id": team_membership.id}]
+                },
+                "members": {"data": [{"type": "users", "id": user1.id}]},
+            },
+            "links": {"self": f"http://localhost/teams/{team.id}"},
+        },
+        "included": [
+            {
+                "type": "team_memberships",
+                "id": team_membership.id,
+                "attributes": {"user_id": user1.id, "team_id": team.id},
+                "links": {
+                    "self": f"http://localhost/team_memberships/{team_membership.id}"
+                },
+            },
+            {
+                "type": "users",
+                "id": user1.id,
+                "attributes": {"username": user1.username},
+                "links": {"self": f"http://localhost/users/{user1.id}"},
+            },
+        ],
     }

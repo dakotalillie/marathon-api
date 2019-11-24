@@ -1,11 +1,11 @@
-from flask_restful import Resource, reqparse, marshal_with
+from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
 from ..exceptions import BadRequestError, ForbiddenError
-from ..models import Team, User
+from ..models import Team, TeamMembership, User
 from ..utils.is_valid_uuid import is_valid_uuid
-from ..utils.controller_decorators import call_before, get_resource
+from ..utils.controller_decorators import call_before, get_resource, format_response
 
 
 def validate_uuid(*args, team_id):
@@ -36,7 +36,23 @@ class TeamDetail(Resource):
     @jwt_required
     @call_before([validate_uuid])
     @get_resource(Team)
-    @marshal_with(Team.marshaller.all(), envelope="data")
+    @format_response(
+        {
+            "name": "teams",
+            "marshaller": Team.marshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembership.marshaller.omit("id"),
+                },
+                {
+                    "name": "users",
+                    "related_name": "members",
+                    "marshaller": User.marshaller.omit("id"),
+                },
+            ],
+        }
+    )
     def get(self, team):
         # pylint: disable=no-self-use
         return team
@@ -45,7 +61,9 @@ class TeamDetail(Resource):
     @call_before([validate_uuid])
     @get_resource(Team)
     @call_before([validate_permissions])
-    @marshal_with(Team.marshaller.all(), envelope="data")
+    @format_response(
+        {"name": "teams", "marshaller": Team.marshaller.omit("id"),}
+    )
     def patch(self, team):
         args = self.parser.parse_args()
         for key, value in args.items():
