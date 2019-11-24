@@ -111,20 +111,33 @@ def format_response(config):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            resource_or_resource_list = func(*args, **kwargs)
-            return {
-                "links": {"self": request.url},
-                "data": _make_data(resource_or_resource_list, config),
-                **(
-                    {"included": _make_included(resource_or_resource_list, config)}
-                    if "relationships" in config
-                    else {}
-                ),
-            }
+            response = func(*args, **kwargs)
+            formatted_body = _get_formatted_response_body(response, config)
+            status_code = response[1] if isinstance(response, tuple) else 200
+            return formatted_body, status_code
 
         return wrapper
 
     return decorator
+
+
+def _get_formatted_response_body(response, config):
+    resource_or_resource_list = _get_resource_or_resource_list(response)
+    return {
+        "links": {"self": request.url},
+        "data": _make_data(resource_or_resource_list, config),
+        **(
+            {"included": _make_included(resource_or_resource_list, config)}
+            if "relationships" in config
+            else {}
+        ),
+    }
+
+
+def _get_resource_or_resource_list(response):
+    if isinstance(response, tuple):
+        return response[0]
+    return response
 
 
 def _make_data(resource_or_resource_list, config):
