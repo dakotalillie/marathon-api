@@ -2,8 +2,9 @@ import os
 from operator import itemgetter
 
 from flask import Flask
-from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate, upgrade
+from flask_restful import Api
 
 from .controllers import (
     Auth,
@@ -83,6 +84,9 @@ def create_app(
     setup_api(app)
     setup_jwt(app)
     setup_error_handling(app)
+    Migrate(app, DB)
+    with app.app_context():
+        upgrade()
     return app
 
 
