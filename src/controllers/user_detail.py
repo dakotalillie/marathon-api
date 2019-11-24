@@ -3,9 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..db import DB
 from ..exceptions import BadRequestError, ForbiddenError
-from ..models import User
+from ..models import Team, TeamMembership, User
 from ..utils.is_valid_uuid import is_valid_uuid
-from ..utils.controller_decorators import call_before, get_resource
+from ..utils.controller_decorators import call_before, get_resource, format_response
 
 
 def validate_uuid(*args, user_id):
@@ -36,7 +36,19 @@ class UserDetail(Resource):
     @jwt_required
     @call_before([validate_uuid])
     @get_resource(User)
-    @marshal_with(User.marshaller.all(), envelope="data")
+    @format_response(
+        {
+            "name": "users",
+            "marshaller": User.marshaller.omit("id"),
+            "relationships": [
+                {
+                    "name": "team_memberships",
+                    "marshaller": TeamMembership.marshaller.omit("id"),
+                },
+                {"name": "teams", "marshaller": Team.marshaller.omit("id"),},
+            ],
+        }
+    )
     def get(self, user):
         # pylint: disable=no-self-use
         return user

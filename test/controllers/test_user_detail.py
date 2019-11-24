@@ -5,6 +5,7 @@ from flask_jwt_extended import create_access_token
 from flask_restful import marshal
 import pytest
 
+from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import User
 
@@ -77,20 +78,75 @@ def test_user_detail_get_nonexistent(client, user1):
     )
 
 
-def test_user_detail_get_success(client, user1):
+def test_user_detail_get_success(client, user1, team1):
     """
     GIVEN an existing user on the platform
     WHEN a get request is made to `/users/<user_id>` with the user's ID
     THEN the response should have a 200 status code and return the details of the user
     """
 
+    team1.members.append(user1)
+    DB.session.add(team1)
+    DB.session.commit()
+
     response = client.get(
         f"/users/{user1.id}",
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
+
+    team_membership = user1.team_memberships[0]
+
     assert response.status_code == 200
     assert json.loads(response.data.decode()) == {
-        "data": dict(marshal(user1, User.marshaller.all()))
+        "links": {"self": f"http://localhost/users/{user1.id}"},
+        "data": {
+            "type": "users",
+            "id": user1.id,
+            "attributes": {
+                "created_at": user1.created_at.isoformat(),
+                "updated_at": user1.updated_at.isoformat(),
+                "is_active": True,
+                "first_name": user1.first_name,
+                "last_name": user1.last_name,
+                "username": user1.username,
+                "email": user1.email,
+                "visibility": user1.visibility,
+            },
+            "relationships": {
+                "team_memberships": {
+                    "data": [{"type": "team_memberships", "id": team_membership.id}]
+                },
+                "teams": {"data": [{"type": "teams", "id": team1.id}]},
+            },
+            "links": {"self": f"http://localhost/users/{user1.id}"},
+        },
+        "included": [
+            {
+                "type": "team_memberships",
+                "id": team_membership.id,
+                "attributes": {
+                    "user_id": user1.id,
+                    "team_id": team1.id,
+                    "created_at": team_membership.created_at.isoformat(),
+                    "updated_at": team_membership.updated_at.isoformat(),
+                    "is_active": True,
+                },
+                "links": {
+                    "self": f"http://localhost/team_memberships/{team_membership.id}"
+                },
+            },
+            {
+                "type": "teams",
+                "id": team1.id,
+                "attributes": {
+                    "name": team1.name,
+                    "created_at": team1.created_at.isoformat(),
+                    "updated_at": team1.updated_at.isoformat(),
+                    "is_active": True,
+                },
+                "links": {"self": f"http://localhost/teams/{team1.id}"},
+            },
+        ],
     }
 
 
