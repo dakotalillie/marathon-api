@@ -53,9 +53,9 @@ def user2(app):
 
 
 @pytest.fixture
-def team1(app):
-    # pylint: disable=unused-argument
-    team = Team(name="team1")
+def team1(app, user1):
+    # pylint: disable=unused-argument, redefined-outer-name
+    team = Team(name="team1", created_by=user1.id, updated_by=user1.id)
     DB.session.add(team)
     DB.session.commit()
     yield team

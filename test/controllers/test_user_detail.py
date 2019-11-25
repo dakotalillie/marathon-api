@@ -6,7 +6,7 @@ import pytest
 
 from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
-from src.models import User
+from src.models import TeamMembership, User
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -96,8 +96,11 @@ def test_user_detail_get_success(client, user1, team1):
     THEN the response should have a 200 status code and return the details of the user
     """
 
-    team1.members.append(user1)
-    DB.session.add(team1)
+    DB.session.add(
+        TeamMembership(
+            user_id=user1.id, team_id=team1.id, created_by=user1.id, updated_by=user1.id
+        )
+    )
     DB.session.commit()
 
     response = client.get(
@@ -139,7 +142,9 @@ def test_user_detail_get_success(client, user1, team1):
                     "user_id": user1.id,
                     "team_id": team1.id,
                     "created_at": team_membership.created_at.isoformat(),
+                    "created_by": user1.id,
                     "updated_at": team_membership.updated_at.isoformat(),
+                    "updated_by": user1.id,
                     "is_active": True,
                 },
                 "links": {
@@ -152,7 +157,9 @@ def test_user_detail_get_success(client, user1, team1):
                 "attributes": {
                     "name": team1.name,
                     "created_at": team1.created_at.isoformat(),
+                    "created_by": user1.id,
                     "updated_at": team1.updated_at.isoformat(),
+                    "updated_by": user1.id,
                     "is_active": True,
                 },
                 "links": {"self": f"http://localhost/teams/{team1.id}"},

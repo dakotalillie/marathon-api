@@ -6,7 +6,7 @@ import pytest
 
 from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
-from src.models import Team
+from src.models import Team, TeamMembership
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -103,15 +103,16 @@ def test_team_detail_get_success(client, team1, user1):
     THEN the response should have a 200 status code and return the details of the team
     """
 
-    team1.members.append(user1)
-    DB.session.add(team1)
+    DB.session.add(
+        TeamMembership(
+            user_id=user1.id, team_id=team1.id, created_by=user1.id, updated_by=user1.id
+        )
+    )
     DB.session.commit()
 
     response = client.get(
         f"/teams/{team1.id}",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     team_membership = team1.team_memberships[0]
     assert response.status_code == 200
@@ -121,10 +122,12 @@ def test_team_detail_get_success(client, team1, user1):
             "type": "teams",
             "id": team1.id,
             "attributes": {
-                "created_at": team1.created_at.isoformat(),
-                "updated_at": team1.updated_at.isoformat(),
-                "is_active": True,
                 "name": team1.name,
+                "created_at": team1.created_at.isoformat(),
+                "created_by": user1.id,
+                "updated_at": team1.updated_at.isoformat(),
+                "updated_by": user1.id,
+                "is_active": True,
             },
             "relationships": {
                 "team_memberships": {
@@ -142,7 +145,9 @@ def test_team_detail_get_success(client, team1, user1):
                     "user_id": user1.id,
                     "team_id": team1.id,
                     "created_at": team_membership.created_at.isoformat(),
+                    "created_by": user1.id,
                     "updated_at": team_membership.updated_at.isoformat(),
+                    "updated_by": user1.id,
                     "is_active": True,
                 },
                 "links": {
@@ -302,10 +307,12 @@ def test_team_detail_patch_success(client, user1, team1):
             "type": "teams",
             "id": team1.id,
             "attributes": {
-                "created_at": team1.created_at.isoformat(),
-                "updated_at": team1.updated_at.isoformat(),
-                "is_active": True,
                 "name": "new team name",
+                "created_at": team1.created_at.isoformat(),
+                "created_by": user1.id,
+                "updated_at": team1.updated_at.isoformat(),
+                "updated_by": user1.id,
+                "is_active": True,
             },
             "links": {"self": f"http://localhost/teams/{team1.id}"},
         },
