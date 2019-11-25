@@ -67,9 +67,7 @@ def test_team_list_get_success(client, user1, team1):
 
     response = client.get(
         "/teams",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     team_membership = user1.team_memberships[0]
     assert response.status_code == 200
@@ -80,10 +78,12 @@ def test_team_list_get_success(client, user1, team1):
                 "type": "teams",
                 "id": team1.id,
                 "attributes": {
-                    "created_at": team1.created_at.isoformat(),
-                    "updated_at": team1.updated_at.isoformat(),
-                    "is_active": True,
                     "name": team1.name,
+                    "created_at": team1.created_at.isoformat(),
+                    "created_by": user1.id,
+                    "updated_at": team1.updated_at.isoformat(),
+                    "updated_by": user1.id,
+                    "is_active": True,
                 },
                 "relationships": {
                     "team_memberships": {
@@ -239,10 +239,12 @@ def test_team_list_post_success(client, user1):
             "type": "teams",
             "id": team.id,
             "attributes": {
-                "created_at": team.created_at.isoformat(),
-                "updated_at": team.updated_at.isoformat(),
-                "is_active": True,
                 "name": team.name,
+                "created_at": team.created_at.isoformat(),
+                "created_by": user1.id,
+                "updated_at": team.updated_at.isoformat(),
+                "updated_by": user1.id,
+                "is_active": True,
             },
             "relationships": {
                 "team_memberships": {
