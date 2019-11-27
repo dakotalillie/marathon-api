@@ -16,15 +16,6 @@ services:
             - type: bind
               source: ../
               target: /app
-    swagger-ui:
-        container_name: swagger-ui
-        environment:
-            - SWAGGER_JSON=/swagger.yml
-        image: swaggerapi/swagger-ui
-        ports:
-            - 8080:8080
-        volumes:
-            - ../swagger.yml:/swagger.yml
     postgres:
         build:
             context: .
