@@ -22,7 +22,6 @@ This app is built using:
 -   SQLAlchemy
 -   PostgreSQL
 -   Docker
--   Swagger
 -   Jenkins
 
 The code is linted using pylint, formatted using black, and tested using pytest.
@@ -46,10 +45,7 @@ make start-dev -- -d
 This will build the image for the app locally and start the following containers:
 
 -   A development API server, running on port 5000
--   A swagger UI server, running on port 8080
 -   A postgres server, running on port 5432
-
-(The swagger UI docs were mostly using for endpoint planning and mapping out a crude domain model. They are not currently up to date, though I intend on updating them soon.)
 
 To stop the containers, you can run:
 
