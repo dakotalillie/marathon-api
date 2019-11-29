@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token
 from src.db import DB
 from src.models import TeamMembership
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
+from .utils import get_content_type
 
 
 def test_team_memberships_detail_delete_without_auth(client):
@@ -18,6 +19,7 @@ def test_team_memberships_detail_delete_without_auth(client):
 
     response = client.delete(f"/team_memberships/{str(uuid4())}")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -41,6 +43,7 @@ def test_team_memberships_detail_delete_with_invalid_auth(client):
         f"/team_memberships/{str(uuid4())}", headers=dict(authorization="abcdefg")
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -67,6 +70,7 @@ def test_team_memberships_detail_delete_non_uuid(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             BadRequestError("TeamMembership ID abcdefg is not a valid UUID").to_dict()
@@ -91,6 +95,7 @@ def test_team_membership_detail_delete_nonexistent(client):
     )
 
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             NotFoundError(
@@ -123,6 +128,7 @@ def test_team_membership_detail_delete_non_member(client, user1, user2, team1):
     )
 
     assert response.status_code == 403
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ForbiddenError(
@@ -158,5 +164,6 @@ def test_team_membership_detail_delete_success(client, user1, team1):
     )
 
     assert response.status_code == 204
+    assert get_content_type(response) == "application/vnd.api+json"
     assert user1 not in team1.members
     assert len(response.data) == 0

@@ -76,6 +76,14 @@ def setup_error_handling(app):
         return make_error_response(error)
 
 
+def setup_response_headers(app):
+    # pylint: disable=unused-variable
+    @app.after_request
+    def add_content_type(resp):
+        resp.headers["Content-Type"] = "application/vnd.api+json"
+        return resp
+
+
 def create_app(
     db_user=os.getenv("DB_USER"),
     db_password=os.getenv("DB_PASSWORD"),
@@ -93,6 +101,7 @@ def create_app(
     setup_api(app)
     setup_jwt(app)
     setup_error_handling(app)
+    setup_response_headers(app)
     Migrate(app, DB)
     with app.app_context():
         upgrade()

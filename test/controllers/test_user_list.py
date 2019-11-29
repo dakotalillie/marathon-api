@@ -6,6 +6,7 @@ import pytest
 from src.db import DB
 from src.exceptions import ConflictError
 from src.models import User
+from .utils import get_content_type
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -22,6 +23,7 @@ def test_user_list_get_without_auth(client):
 
     response = client.get("/users")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -42,6 +44,7 @@ def test_user_list_get_with_invalid_auth(client):
 
     response = client.get("/users", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -69,8 +72,8 @@ def test_user_list_get_success(client, user1, team1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     team_membership = user1.team_memberships[0]
-
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": "http://localhost/users"},
         "data": [
@@ -128,6 +131,7 @@ def test_user_list_post_missing_parameters(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         message=dict(password="Missing required parameter in the post body")
     )
@@ -151,6 +155,7 @@ def test_user_list_post_duplicate_email(client, user1):
         ),
     )
     assert response.status_code == 409
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ConflictError(f"User with email {user1.email} already exists").to_dict()
@@ -176,6 +181,7 @@ def test_user_list_post_duplicate_username(client, user1):
         ),
     )
     assert response.status_code == 409
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ConflictError(
@@ -203,6 +209,7 @@ def test_user_list_post_success(client):
     )
     user = User.query.filter_by(username="username").first()
     assert response.status_code == 201
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": "http://localhost/users"},
         "data": {

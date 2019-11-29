@@ -8,6 +8,7 @@ import pytest
 from src.db import DB
 from src.exceptions import BadRequestError
 from src.models import TeamMembership
+from .utils import get_content_type
 
 
 def get_existing_team_memberships(user_id, team_id):
@@ -24,6 +25,7 @@ def test_team_memberships_list_post_without_auth(client):
         "/team_memberships", data=dict(user=str(uuid4()), team=str(uuid4()))
     )
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -49,6 +51,7 @@ def test_team_memberships_list_post_with_invalid_auth(client):
         headers=dict(authorization="abcdefg"),
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -94,6 +97,7 @@ def test_team_memberships_list_post_missing_parameters(client, test_input, expec
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(message=expected)
 
 
@@ -111,6 +115,7 @@ def test_team_memberships_list_post_non_existent_user(client, team1):
     )
 
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             BadRequestError(
@@ -134,6 +139,7 @@ def test_team_memberships_list_post_non_existent_team(client, user1):
     )
 
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             BadRequestError(
@@ -164,6 +170,7 @@ def test_team_memberships_list_post_duplicate_member(client, user1, team1):
     )
 
     assert response.status_code == 204
+    assert get_content_type(response) == "application/vnd.api+json"
     assert get_team_members().count() == 1
     assert get_team_members().first().updated_at == original_updated_at
     assert len(response.data) == 0
@@ -186,5 +193,6 @@ def test_team_memberships_list_post_success(client, user1, team1):
     )
 
     assert response.status_code == 201
+    assert get_content_type(response) == "application/vnd.api+json"
     assert get_team_members().count() == 1
     assert len(response.data) == 0

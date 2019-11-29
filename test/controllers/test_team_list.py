@@ -7,6 +7,7 @@ import pytest
 from src.db import DB
 from src.exceptions import BadRequestError
 from src.models import Team
+from .utils import get_content_type
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -23,6 +24,7 @@ def test_team_list_get_without_auth(client):
 
     response = client.get("/teams")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -43,6 +45,7 @@ def test_team_list_get_with_invalid_auth(client):
 
     response = client.get("/teams", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -71,6 +74,7 @@ def test_team_list_get_success(client, user1, team1):
     )
     team_membership = user1.team_memberships[0]
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": "http://localhost/teams"},
         "data": [
@@ -123,6 +127,7 @@ def test_team_list_post_without_auth(client):
         "/teams", data=dict(name="team 1", team_members=[str(uuid.uuid4())]),
     )
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -147,6 +152,7 @@ def test_team_list_post_with_invalid_auth(client):
         headers=dict(authorization="abcdefg"),
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -172,6 +178,7 @@ def test_team_list_post_missing_parameters(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         message=dict(team_members="Missing required parameter in the post body")
     )
@@ -192,6 +199,7 @@ def test_team_list_post_no_team_members(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         message=dict(team_members="Missing required parameter in the post body")
     )
@@ -214,6 +222,7 @@ def test_team_list_post_invalid_team_members(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError(f"User with id {user_id} does not exist").to_dict()]
     )
@@ -233,6 +242,7 @@ def test_team_list_post_success(client, user1):
     team = Team.query.filter_by(name="team 1").first()
     team_membership = user1.team_memberships[0]
     assert response.status_code == 201
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": "http://localhost/teams"},
         "data": {
