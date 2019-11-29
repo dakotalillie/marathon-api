@@ -7,13 +7,17 @@ from sqlalchemy.exc import IntegrityError
 from ..db import DB
 from ..exceptions import ConflictError
 from ..models import Team, TeamMembership, User
-from ..utils.controller_decorators import format_response
+from ..utils.controller_decorators import format_response, call_before
+from ..utils.controller_validators import (
+    validate_accept_header,
+    validate_content_type_header,
+)
 
 
 def make_parser():
     parser = reqparse.RequestParser()
     for arg in ("first_name", "last_name", "username", "email", "password"):
-        parser.add_argument(name=arg, required=True, nullable=False, location="form")
+        parser.add_argument(name=arg, required=True, nullable=False, location="json")
     return parser
 
 
@@ -42,6 +46,7 @@ class UserList(Resource):
         self.parser = make_parser()
 
     @jwt_required
+    @call_before([validate_accept_header])
     @format_response(
         {
             "name": "users",
@@ -59,6 +64,7 @@ class UserList(Resource):
         # pylint: disable=no-self-use
         return User.query.all()
 
+    @call_before([validate_accept_header, validate_content_type_header])
     @format_response({"name": "users", "marshaller": User.marshaller.omit("id")})
     def post(self):
         args = self.parser.parse_args()

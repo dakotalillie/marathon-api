@@ -16,13 +16,41 @@ pytestmark = [
 ]
 
 
+def test_user_detail_get_invalid_accept_header(client):
+    """
+    WHEN a get request is made to `/users/<user_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.get(
+        f"/users/{str(uuid.uuid4())}",
+        headers={
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_user_detail_get_without_auth(client):
     """
     WHEN a get request is made to `/users/<user_id>` without a token in the `authorization` header
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.get("/users/abcdefg")
+    response = client.get(
+        "/users/abcdefg", headers={"Accept": "application/vnd.api+json"},
+    )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -44,7 +72,10 @@ def test_user_detail_get_with_invalid_auth(client):
     malformed
     """
 
-    response = client.get("/users/abcdefg", headers=dict(authorization="abcdefg"))
+    response = client.get(
+        "/users/abcdefg",
+        headers={"Accept": "application/vnd.api+json", "Authorization": "abcdefg"},
+    )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -67,7 +98,10 @@ def test_user_detail_get_non_uuid(client, user1):
 
     response = client.get(
         "/users/abcdefg",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -85,7 +119,10 @@ def test_user_detail_get_nonexistent(client, user1):
     user_id = str(uuid.uuid4())
     response = client.get(
         f"/users/{user_id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -110,7 +147,10 @@ def test_user_detail_get_success(client, user1, team1):
 
     response = client.get(
         f"/users/{user1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
 
     team_membership = user1.team_memberships[0]
@@ -174,13 +214,77 @@ def test_user_detail_get_success(client, user1, team1):
     }
 
 
+def test_user_detail_patch_invalid_accept_header(client, user1):
+    """
+    WHEN a patch request is made to `/users/<user_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.patch(
+        f"/users/{user1.id}",
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
+def test_user_detail_patch_invalid_content_type_header(client, user1):
+    """
+    WHEN a patch request is made to `/users/<user_id>` and the `Content-Type` header is not
+    correctly set
+    THEN the response should have a 415 status code and indicate that the `Content-Type` header is
+    not correctly set
+    """
+
+    response = client.patch(
+        f"/users/{user1.id}",
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
+        data=json.dumps({"first_name": "updated_first"}),
+    )
+    assert response.status_code == 415
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 415,
+                "title": "Unsupported Media Type",
+                "detail": "'Content-Type' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_user_detail_patch_without_auth(client):
     """
     WHEN a patch request is made to `/users/<user_id>` without a token in the `authorization` header
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.patch("/users/abcdefg")
+    response = client.patch(
+        "/users/abcdefg",
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+    )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -202,7 +306,15 @@ def test_user_detail_patch_with_invalid_auth(client):
     malformed
     """
 
-    response = client.patch("/users/abcdefg", headers=dict(authorization="abcdefg"))
+    response = client.patch(
+        "/users/abcdefg",
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": "abcdefg",
+            "Content-Type": "application/vnd.api+json",
+        },
+    )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -225,8 +337,12 @@ def test_user_detail_patch_non_uuid(client, user1):
 
     response = client.patch(
         "/users/abcdefg",
-        data=dict(first_name="first"),
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -244,8 +360,12 @@ def test_user_detail_patch_nonexistent(client):
     user_id = str(uuid.uuid4())
     response = client.patch(
         f"/users/{user_id}",
-        data=dict(first_name="first"),
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user_id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -263,8 +383,12 @@ def test_user_detail_patch_different_user(client, user1, user2):
 
     response = client.patch(
         f"/users/{user1.id}",
-        data=dict(first_name="updated_first"),
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user2.id)}"),
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user2.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 403
     assert get_content_type(response) == "application/vnd.api+json"
@@ -286,8 +410,12 @@ def test_user_detail_patch_success(client, user1):
 
     response = client.patch(
         f"/users/{user1.id}",
-        data=dict(first_name="updated_first"),
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        data=json.dumps({"first_name": "updated_first"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 200
     assert get_content_type(response) == "application/vnd.api+json"
@@ -312,6 +440,30 @@ def test_user_detail_patch_success(client, user1):
     }
 
 
+def test_user_detail_delete_invalid_accept_header(client, user1):
+    """
+    WHEN a delete request is made to `/users/<user_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.delete(
+        f"/users/{user1.id}",
+        headers={"Authorization": f"Bearer {create_access_token(identity=user1.id)}"},
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_user_detail_delete_without_auth(client, user1):
     """
     WHEN a delete request is made to `/users/<user_id>` without a token in the `authorization`
@@ -319,7 +471,9 @@ def test_user_detail_delete_without_auth(client, user1):
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.delete(f"/users/{user1.id}")
+    response = client.delete(
+        f"/users/{user1.id}", headers={"Accept": "application/vnd.api+json"}
+    )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -342,7 +496,8 @@ def test_user_detail_delete_with_invalid_auth(client, user1):
     """
 
     response = client.delete(
-        f"/users/{user1.id}", headers=dict(authorization="abcdefg")
+        f"/users/{user1.id}",
+        headers={"Accept": "application/vnd.api+json", "Authorization": "abcdefg"},
     )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
@@ -366,7 +521,10 @@ def test_user_detail_delete_non_uuid(client, user1):
 
     response = client.delete(
         "/users/abcdefg",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -384,7 +542,10 @@ def test_user_detail_delete_nonexistent(client):
     user_id = str(uuid.uuid4())
     response = client.delete(
         f"/users/{user_id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user_id)}",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -402,7 +563,10 @@ def test_user_detail_delete_different_user(client, user1, user2):
 
     response = client.delete(
         f"/users/{user1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user2.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user2.id)}",
+        },
     )
     assert response.status_code == 403
     assert get_content_type(response) == "application/vnd.api+json"
@@ -424,7 +588,10 @@ def test_user_detail_delete_success(client, user1):
 
     response = client.delete(
         f"/users/{user1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 204
     assert get_content_type(response) == "application/vnd.api+json"

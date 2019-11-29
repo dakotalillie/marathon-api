@@ -15,13 +15,37 @@ pytestmark = [
 ]
 
 
+def test_user_list_get_invalid_accept_header(client, user1):
+    """
+    WHEN a get request is made to `/users` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.get(
+        "/users",
+        headers={"Authorization": f"Bearer {create_access_token(identity=user1.id)}"},
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_user_list_get_without_auth(client):
     """
     WHEN a get request is made to `/users` without a token in the `authorization` header
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.get("/users")
+    response = client.get("/users", headers={"Accept": "application/vnd.api+json"})
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -42,7 +66,10 @@ def test_user_list_get_with_invalid_auth(client):
     malformed
     """
 
-    response = client.get("/users", headers=dict(authorization="abcdefg"))
+    response = client.get(
+        "/users",
+        headers={"Accept": "application/vnd.api+json", "Authorization": "abcdefg"},
+    )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -69,7 +96,10 @@ def test_user_list_get_success(client, user1, team1):
 
     response = client.get(
         "/users",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     team_membership = user1.team_memberships[0]
     assert response.status_code == 200
@@ -118,6 +148,68 @@ def test_user_list_get_success(client, user1, team1):
     }
 
 
+def test_user_list_post_invalid_accept_header(client):
+    """
+    WHEN a post request is made to `/users` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.post(
+        "/users",
+        headers={"Content-Type": "application/vnd.api+json"},
+        data={
+            "first_name": "first",
+            "last_name": "last",
+            "username": "username",
+            "email": "email",
+            "password": "password",
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
+def test_user_list_post_invalid_content_type_header(client):
+    """
+    WHEN a post request is made to `/users` and the `Content-Type` header is not correctly set
+    THEN the response should have a 415 status code and indicate that the `Content-Type` header is
+    not correctly set
+    """
+
+    response = client.post(
+        "/users",
+        headers={"Accept": "application/vnd.api+json"},
+        data={
+            "first_name": "first",
+            "last_name": "last",
+            "username": "username",
+            "email": "email",
+            "password": "password",
+        },
+    )
+    assert response.status_code == 415
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 415,
+                "title": "Unsupported Media Type",
+                "detail": "'Content-Type' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_user_list_post_missing_parameters(client):
     """
     WHEN a post request is made to `/users` which is missing required fields
@@ -126,14 +218,20 @@ def test_user_list_post_missing_parameters(client):
 
     response = client.post(
         "/users",
-        data=dict(
-            first_name="first", last_name="last", username="username", email="email"
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps(
+            dict(
+                first_name="first", last_name="last", username="username", email="email"
+            )
         ),
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
-        message=dict(password="Missing required parameter in the post body")
+        message=dict(password="Missing required parameter in the JSON body")
     )
 
 
@@ -146,12 +244,18 @@ def test_user_list_post_duplicate_email(client, user1):
 
     response = client.post(
         "/users",
-        data=dict(
-            first_name="first",
-            last_name="last",
-            username="new_username",
-            email=user1.email,
-            password="password",
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps(
+            dict(
+                first_name="first",
+                last_name="last",
+                username="new_username",
+                email=user1.email,
+                password="password",
+            )
         ),
     )
     assert response.status_code == 409
@@ -172,12 +276,18 @@ def test_user_list_post_duplicate_username(client, user1):
 
     response = client.post(
         "/users",
-        data=dict(
-            first_name="first",
-            last_name="last",
-            username=user1.username,
-            email="new_email",
-            password="password",
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps(
+            dict(
+                first_name="first",
+                last_name="last",
+                username=user1.username,
+                email="new_email",
+                password="password",
+            )
         ),
     )
     assert response.status_code == 409
@@ -199,12 +309,18 @@ def test_user_list_post_success(client):
 
     response = client.post(
         "/users",
-        data=dict(
-            first_name="first",
-            last_name="last",
-            username="username",
-            email="email@email.com",
-            password="password",
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps(
+            dict(
+                first_name="first",
+                last_name="last",
+                username="username",
+                email="email@email.com",
+                password="password",
+            )
         ),
     )
     user = User.query.filter_by(username="username").first()
