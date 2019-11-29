@@ -26,7 +26,7 @@ class UnauthorizedError(ClientError):
     status = 401
     default_title = "Unauthorized"
     default_message = (
-        "The requested operation could not be completed due to missing or invalid"
+        "The requested operation could not be completed due to missing or invalid "
         "authorization"
     )
 
@@ -43,10 +43,28 @@ class NotFoundError(ClientError):
     default_message = "The requested resource does not exist"
 
 
+class NotAcceptableError(ClientError):
+    status = 406
+    default_title = "Not Acceptable"
+    default_message = (
+        "The requested operation could not be completed because the server cannot generate content "
+        "matching the request's 'Accept' header"
+    )
+
+
 class ConflictError(ClientError):
     status = 409
     default_title = "Conflict"
     default_message = "The requested operation could not be completed due to a conflict"
+
+
+class UnsupportedMediaTypeError(ClientError):
+    status = 415
+    default_title = "Unsupported Media Type"
+    default_message = (
+        "The requested operation could not be completed because the server does not support the "
+        "specified content type"
+    )
 
 
 class UnprocessableEntityError(ClientError):

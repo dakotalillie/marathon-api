@@ -6,6 +6,10 @@ from ..exceptions import BadRequestError, ForbiddenError
 from ..models import Team, TeamMembership, User
 from ..utils.is_valid_uuid import is_valid_uuid
 from ..utils.controller_decorators import call_before, get_resource, format_response
+from ..utils.controller_validators import (
+    validate_accept_header,
+    validate_content_type_header,
+)
 
 
 def validate_uuid(*args, user_id):
@@ -24,7 +28,7 @@ def validate_permissions(*args, user_id):
 def make_parser():
     parser = reqparse.RequestParser()
     for key in ("first_name", "last_name", "username", "email", "password"):
-        parser.add_argument(name=key, nullable=False, location="form")
+        parser.add_argument(name=key, nullable=False, location="json")
     return parser
 
 
@@ -34,7 +38,7 @@ class UserDetail(Resource):
         self.parser = make_parser()
 
     @jwt_required
-    @call_before([validate_uuid])
+    @call_before([validate_accept_header, validate_uuid])
     @get_resource(User)
     @format_response(
         {
@@ -54,7 +58,14 @@ class UserDetail(Resource):
         return user
 
     @jwt_required
-    @call_before([validate_uuid, validate_permissions])
+    @call_before(
+        [
+            validate_accept_header,
+            validate_content_type_header,
+            validate_uuid,
+            validate_permissions,
+        ]
+    )
     @get_resource(User)
     @format_response(
         {"name": "users", "marshaller": User.marshaller.omit("id"),}
@@ -69,7 +80,7 @@ class UserDetail(Resource):
         return user
 
     @jwt_required
-    @call_before([validate_uuid, validate_permissions])
+    @call_before([validate_accept_header, validate_uuid, validate_permissions])
     @get_resource(User)
     def delete(self, user):
         # pylint: disable=no-self-use

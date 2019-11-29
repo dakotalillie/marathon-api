@@ -24,6 +24,8 @@ from .exceptions import (
     NotFoundError,
     UnauthorizedError,
     UnprocessableEntityError,
+    NotAcceptableError,
+    UnsupportedMediaTypeError,
 )
 
 
@@ -72,6 +74,8 @@ def setup_error_handling(app):
     @app.errorhandler(ForbiddenError)
     @app.errorhandler(NotFoundError)
     @app.errorhandler(UnauthorizedError)
+    @app.errorhandler(NotAcceptableError)
+    @app.errorhandler(UnsupportedMediaTypeError)
     def handle_error(error):
         return make_error_response(error)
 
