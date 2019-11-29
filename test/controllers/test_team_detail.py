@@ -7,6 +7,7 @@ import pytest
 from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import Team, TeamMembership
+from .utils import get_content_type
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -24,6 +25,7 @@ def test_team_detail_get_without_auth(client):
 
     response = client.get(f"/teams/{str(uuid.uuid4())}")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -47,6 +49,7 @@ def test_team_detail_get_with_invalid_auth(client):
         f"/teams/{str(uuid.uuid4())}", headers=dict(authorization="abcdefg")
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -72,6 +75,7 @@ def test_team_detail_get_non_uuid(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("Team ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -91,6 +95,7 @@ def test_team_detail_get_nonexistent(client):
         ),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No Team exists with the ID {team_id}").to_dict()]
     )
@@ -116,6 +121,7 @@ def test_team_detail_get_success(client, team1, user1):
     )
     team_membership = team1.team_memberships[0]
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": f"http://localhost/teams/{team1.id}"},
         "data": {
@@ -183,6 +189,7 @@ def test_team_detail_patch_without_auth(client):
         f"/teams/{str(uuid.uuid4())}", data=dict(name="new team name")
     )
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -208,6 +215,7 @@ def test_team_detail_patch_with_invalid_auth(client):
         data=dict(name="new team name"),
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -234,6 +242,7 @@ def test_team_detail_patch_non_uuid(client):
         data=dict(name="new team name"),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("Team ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -254,6 +263,7 @@ def test_team_detail_patch_nonexistent(client):
         data=dict(name="new team name"),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No Team exists with the ID {team_id}").to_dict()]
     )
@@ -274,6 +284,7 @@ def test_team_detail_patch_not_team_member(client, user1, team1):
         data=dict(name="new team name"),
     )
     assert response.status_code == 403
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ForbiddenError(
@@ -300,6 +311,7 @@ def test_team_detail_patch_success(client, user1, team1):
         data=dict(name="new team name"),
     )
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert Team.query.filter_by(id=team1.id).first().name == "new team name"
     assert json.loads(response.data.decode()) == {
         "links": {"self": f"http://localhost/teams/{team1.id}"},
@@ -328,6 +340,7 @@ def test_team_detail_delete_without_auth(client):
 
     response = client.delete(f"/teams/{str(uuid.uuid4())}")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -351,6 +364,7 @@ def test_team_detail_delete_with_invalid_auth(client):
         f"/teams/{str(uuid.uuid4())}", headers=dict(authorization="abcdefg"),
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -376,6 +390,7 @@ def test_team_detail_delete_non_uuid(client):
         ),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("Team ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -395,6 +410,7 @@ def test_team_detail_delete_nonexistent(client):
         ),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No Team exists with the ID {team_id}").to_dict()]
     )
@@ -414,6 +430,7 @@ def test_team_detail_delete_not_team_member(client, user1, team1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 403
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ForbiddenError(
@@ -439,5 +456,6 @@ def test_team_detail_delete_success(client, user1, team1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 204
+    assert get_content_type(response) == "application/vnd.api+json"
     assert Team.query.filter_by(id=team1.id).first() is None
     assert len(response.data) == 0

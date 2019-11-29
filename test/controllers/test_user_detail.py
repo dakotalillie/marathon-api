@@ -7,6 +7,7 @@ import pytest
 from src.db import DB
 from src.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from src.models import TeamMembership, User
+from .utils import get_content_type
 
 # pylint: disable=invalid-name
 pytestmark = [
@@ -23,6 +24,7 @@ def test_user_detail_get_without_auth(client):
 
     response = client.get("/users/abcdefg")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -44,6 +46,7 @@ def test_user_detail_get_with_invalid_auth(client):
 
     response = client.get("/users/abcdefg", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -67,6 +70,7 @@ def test_user_detail_get_non_uuid(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -84,6 +88,7 @@ def test_user_detail_get_nonexistent(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
@@ -111,6 +116,7 @@ def test_user_detail_get_success(client, user1, team1):
     team_membership = user1.team_memberships[0]
 
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "links": {"self": f"http://localhost/users/{user1.id}"},
         "data": {
@@ -176,6 +182,7 @@ def test_user_detail_patch_without_auth(client):
 
     response = client.patch("/users/abcdefg")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -197,6 +204,7 @@ def test_user_detail_patch_with_invalid_auth(client):
 
     response = client.patch("/users/abcdefg", headers=dict(authorization="abcdefg"))
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -221,6 +229,7 @@ def test_user_detail_patch_non_uuid(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -239,6 +248,7 @@ def test_user_detail_patch_nonexistent(client):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
@@ -257,6 +267,7 @@ def test_user_detail_patch_different_user(client, user1, user2):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user2.id)}"),
     )
     assert response.status_code == 403
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ForbiddenError(
@@ -279,6 +290,7 @@ def test_user_detail_patch_success(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 200
+    assert get_content_type(response) == "application/vnd.api+json"
     assert User.query.filter_by(id=user1.id).first().first_name == "updated_first"
     assert json.loads(response.data.decode()) == {
         "links": {"self": f"http://localhost/users/{user1.id}"},
@@ -309,6 +321,7 @@ def test_user_detail_delete_without_auth(client, user1):
 
     response = client.delete(f"/users/{user1.id}")
     assert response.status_code == 401
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -332,6 +345,7 @@ def test_user_detail_delete_with_invalid_auth(client, user1):
         f"/users/{user1.id}", headers=dict(authorization="abcdefg")
     )
     assert response.status_code == 422
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
         "errors": [
             {
@@ -355,6 +369,7 @@ def test_user_detail_delete_non_uuid(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 400
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[BadRequestError("User ID abcdefg is not a valid UUID").to_dict()]
     )
@@ -372,6 +387,7 @@ def test_user_detail_delete_nonexistent(client):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user_id)}"),
     )
     assert response.status_code == 404
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[NotFoundError(f"No User exists with the ID {user_id}").to_dict()]
     )
@@ -389,6 +405,7 @@ def test_user_detail_delete_different_user(client, user1, user2):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user2.id)}"),
     )
     assert response.status_code == 403
+    assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == dict(
         errors=[
             ForbiddenError(
@@ -410,5 +427,6 @@ def test_user_detail_delete_success(client, user1):
         headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
     )
     assert response.status_code == 204
+    assert get_content_type(response) == "application/vnd.api+json"
     assert User.query.filter_by(id=user1.id).first() is None
     assert len(response.data) == 0
