@@ -6,6 +6,10 @@ from ..exceptions import BadRequestError, ForbiddenError
 from ..models import Team, TeamMembership, User
 from ..utils.is_valid_uuid import is_valid_uuid
 from ..utils.controller_decorators import call_before, get_resource, format_response
+from ..utils.controller_validators import (
+    validate_accept_header,
+    validate_content_type_header,
+)
 
 
 def validate_uuid(*args, team_id):
@@ -24,7 +28,7 @@ def validate_permissions(*args, team):
 
 def make_parser():
     parser = reqparse.RequestParser()
-    parser.add_argument(name="name", nullable=False, location="form")
+    parser.add_argument(name="name", nullable=False, location="json")
     return parser
 
 
@@ -34,7 +38,7 @@ class TeamDetail(Resource):
         self.parser = make_parser()
 
     @jwt_required
-    @call_before([validate_uuid])
+    @call_before([validate_accept_header, validate_uuid])
     @get_resource(Team)
     @format_response(
         {
@@ -58,7 +62,7 @@ class TeamDetail(Resource):
         return team
 
     @jwt_required
-    @call_before([validate_uuid])
+    @call_before([validate_accept_header, validate_content_type_header, validate_uuid])
     @get_resource(Team)
     @call_before([validate_permissions])
     @format_response(
@@ -74,7 +78,7 @@ class TeamDetail(Resource):
         return team
 
     @jwt_required
-    @call_before([validate_uuid])
+    @call_before([validate_accept_header, validate_uuid])
     @get_resource(Team)
     @call_before([validate_permissions])
     def delete(self, team):

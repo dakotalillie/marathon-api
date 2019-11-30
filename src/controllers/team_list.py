@@ -4,17 +4,21 @@ from flask_jwt_extended import jwt_required
 from ..db import DB
 from ..exceptions import BadRequestError
 from ..models import Team, TeamMembership, User
-from ..utils.controller_decorators import format_response
+from ..utils.controller_decorators import call_before, format_response
+from ..utils.controller_validators import (
+    validate_accept_header,
+    validate_content_type_header,
+)
 
 
 def make_parser():
     parser = reqparse.RequestParser()
-    parser.add_argument(name="name", required=True, nullable=False, location="form")
+    parser.add_argument(name="name", required=True, nullable=False, location="json")
     parser.add_argument(
         name="team_members",
         required=True,
         nullable=False,
-        location="form",
+        location="json",
         action="append",
     )
     return parser
@@ -26,6 +30,7 @@ class TeamList(Resource):
         self.parser = make_parser()
 
     @jwt_required
+    @call_before([validate_accept_header])
     @format_response(
         {
             "name": "teams",
@@ -48,6 +53,7 @@ class TeamList(Resource):
         return Team.query.all()
 
     @jwt_required
+    @call_before([validate_accept_header, validate_content_type_header])
     @format_response(
         {
             "name": "teams",
