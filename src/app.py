@@ -14,6 +14,7 @@ from .controllers import (
     TeamMembershipList,
     UserList,
     UserDetail,
+    UserTeams,
 )
 from .db import DB
 from .exceptions import (
@@ -37,6 +38,7 @@ def setup_db(app, db_params):
         "SQLALCHEMY_DATABASE_URI"
     ] = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ECHO"] = False
     DB.init_app(app)
 
 
@@ -49,6 +51,7 @@ def setup_api(app):
     api.add_resource(TeamMembershipDetail, "/team_memberships/<team_membership_id>")
     api.add_resource(UserList, "/users")
     api.add_resource(UserDetail, "/users/<user_id>")
+    api.add_resource(UserTeams, "/users/<user_id>/teams")
 
 
 def setup_jwt(app):
