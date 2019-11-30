@@ -23,7 +23,9 @@ def test_team_detail_get_without_auth(client):
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.get(f"/teams/{str(uuid.uuid4())}")
+    response = client.get(
+        f"/teams/{str(uuid.uuid4())}", headers={"Accept": "application/vnd.api+json"}
+    )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -46,7 +48,8 @@ def test_team_detail_get_with_invalid_auth(client):
     """
 
     response = client.get(
-        f"/teams/{str(uuid.uuid4())}", headers=dict(authorization="abcdefg")
+        f"/teams/{str(uuid.uuid4())}",
+        headers={"Accept": "application/vnd.api+json", "Authorization": "abcdefg"},
     )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
@@ -61,6 +64,32 @@ def test_team_detail_get_with_invalid_auth(client):
     }
 
 
+def test_team_detail_get_invalid_accept_header(client, team1):
+    """
+    WHEN a get request is made to `/teams/<team_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.get(
+        f"/teams/{team1.id}",
+        headers={
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_team_detail_get_non_uuid(client):
     """
     WHEN a get request is made to `/teams/<team_id>` but the team ID is not a valid UUID
@@ -70,9 +99,10 @@ def test_team_detail_get_non_uuid(client):
 
     response = client.get(
         "/teams/abcdefg",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -90,9 +120,10 @@ def test_team_detail_get_nonexistent(client):
     team_id = str(uuid.uuid4())
     response = client.get(
         f"/teams/{team_id}",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -117,7 +148,10 @@ def test_team_detail_get_success(client, team1, user1):
 
     response = client.get(
         f"/teams/{team1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     team_membership = team1.team_memberships[0]
     assert response.status_code == 200
@@ -179,14 +213,19 @@ def test_team_detail_get_success(client, team1, user1):
     }
 
 
-def test_team_detail_patch_without_auth(client):
+def test_team_detail_patch_without_auth(client, team1):
     """
     WHEN a patch request is made to `/teams/<team_id>` without a token in the `authorization` header
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
     response = client.patch(
-        f"/teams/{str(uuid.uuid4())}", data=dict(name="new team name")
+        f"/teams/{team1.id}",
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
@@ -201,7 +240,7 @@ def test_team_detail_patch_without_auth(client):
     }
 
 
-def test_team_detail_patch_with_invalid_auth(client):
+def test_team_detail_patch_with_invalid_auth(client, team1):
     """
     WHEN a patch request is made to `/teams/<team_id>` with an invalid token in the `authorization`
     header
@@ -210,9 +249,13 @@ def test_team_detail_patch_with_invalid_auth(client):
     """
 
     response = client.patch(
-        f"/teams/{str(uuid.uuid4())}",
-        headers=dict(authorization="abcdefg"),
-        data=dict(name="new team name"),
+        f"/teams/{team1.id}",
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": "abcdefg",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
@@ -227,6 +270,63 @@ def test_team_detail_patch_with_invalid_auth(client):
     }
 
 
+def test_team_detail_patch_invalid_accept_header(client, user1, team1):
+    """
+    WHEN a patch request is made to `/teams/<team_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.patch(
+        f"/teams/{team1.id}",
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
+def test_team_detail_patch_invalid_content_type_header(client, user1, team1):
+    """
+    WHEN a patch request is made to `/teams/<team_id>` and the `Content-Type` header is not
+    correctly set
+    THEN the response should have a 415 status code and indicate that the `Content-Type` header is
+    not correctly set
+    """
+
+    response = client.patch(
+        f"/teams/{team1.id}",
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
+    )
+    assert response.status_code == 415
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 415,
+                "title": "Unsupported Media Type",
+                "detail": "'Content-Type' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_team_detail_patch_non_uuid(client):
     """
     WHEN a patch request is made to `/teams/<team_id>` but the team ID is not a valid UUID
@@ -236,10 +336,12 @@ def test_team_detail_patch_non_uuid(client):
 
     response = client.patch(
         "/teams/abcdefg",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
-        data=dict(name="new team name"),
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -257,10 +359,12 @@ def test_team_detail_patch_nonexistent(client):
     team_id = str(uuid.uuid4())
     response = client.patch(
         f"/teams/{team_id}",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
-        data=dict(name="new team name"),
+        data=json.dumps({"name": "new team name"}),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+            "Content-Type": "application/vnd.api+json",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -280,8 +384,12 @@ def test_team_detail_patch_not_team_member(client, user1, team1):
 
     response = client.patch(
         f"/teams/{team1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
-        data=dict(name="new team name"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps({"name": "new team name"}),
     )
     assert response.status_code == 403
     assert get_content_type(response) == "application/vnd.api+json"
@@ -307,8 +415,12 @@ def test_team_detail_patch_success(client, user1, team1):
 
     response = client.patch(
         f"/teams/{team1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
-        data=dict(name="new team name"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+            "Content-Type": "application/vnd.api+json",
+        },
+        data=json.dumps({"name": "new team name"}),
     )
     assert response.status_code == 200
     assert get_content_type(response) == "application/vnd.api+json"
@@ -338,7 +450,9 @@ def test_team_detail_delete_without_auth(client):
     THEN the response should have a 401 status code and indicate that the header is missing
     """
 
-    response = client.delete(f"/teams/{str(uuid.uuid4())}")
+    response = client.delete(
+        f"/teams/{str(uuid.uuid4())}", headers={"Accept": "application/vnd.api+json"}
+    )
     assert response.status_code == 401
     assert get_content_type(response) == "application/vnd.api+json"
     assert json.loads(response.data.decode()) == {
@@ -361,7 +475,8 @@ def test_team_detail_delete_with_invalid_auth(client):
     """
 
     response = client.delete(
-        f"/teams/{str(uuid.uuid4())}", headers=dict(authorization="abcdefg"),
+        f"/teams/{str(uuid.uuid4())}",
+        headers={"Accept": "application/vnd.api+json", "Authorization": "abcdefg"},
     )
     assert response.status_code == 422
     assert get_content_type(response) == "application/vnd.api+json"
@@ -376,6 +491,32 @@ def test_team_detail_delete_with_invalid_auth(client):
     }
 
 
+def test_team_detail_delete_invalid_accept_header(client, team1):
+    """
+    WHEN a delete request is made to `/teams/<team_id>` and the `ACCEPT` header is not correctly set
+    THEN the response should have a 406 status code and indicate that the `ACCEPT` header is not
+    correctly set
+    """
+
+    response = client.delete(
+        f"/teams/{team1.id}",
+        headers={
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
+    )
+    assert response.status_code == 406
+    assert get_content_type(response) == "application/vnd.api+json"
+    assert json.loads(response.data.decode()) == {
+        "errors": [
+            {
+                "status": 406,
+                "title": "Not Acceptable",
+                "detail": "'Accept' header must be set to 'application/vnd.api+json'",
+            }
+        ]
+    }
+
+
 def test_team_detail_delete_non_uuid(client):
     """
     WHEN a delete request is made to `/teams/<team_id>` but the team ID is not a valid UUID
@@ -385,9 +526,10 @@ def test_team_detail_delete_non_uuid(client):
 
     response = client.delete(
         "/teams/abcdefg",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
     )
     assert response.status_code == 400
     assert get_content_type(response) == "application/vnd.api+json"
@@ -405,9 +547,10 @@ def test_team_detail_delete_nonexistent(client):
     team_id = str(uuid.uuid4())
     response = client.delete(
         f"/teams/{team_id}",
-        headers=dict(
-            authorization=f"Bearer {create_access_token(identity=str(uuid.uuid4()))}"
-        ),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=str(uuid.uuid4()))}",
+        },
     )
     assert response.status_code == 404
     assert get_content_type(response) == "application/vnd.api+json"
@@ -427,7 +570,10 @@ def test_team_detail_delete_not_team_member(client, user1, team1):
 
     response = client.delete(
         f"/teams/{team1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 403
     assert get_content_type(response) == "application/vnd.api+json"
@@ -453,7 +599,10 @@ def test_team_detail_delete_success(client, user1, team1):
 
     response = client.delete(
         f"/teams/{team1.id}",
-        headers=dict(authorization=f"Bearer {create_access_token(identity=user1.id)}"),
+        headers={
+            "Accept": "application/vnd.api+json",
+            "Authorization": f"Bearer {create_access_token(identity=user1.id)}",
+        },
     )
     assert response.status_code == 204
     assert get_content_type(response) == "application/vnd.api+json"
