@@ -6,14 +6,21 @@ class ClientError(Exception):
     status = -1
     default_message = ""
     default_title = ""
+    source = None
 
-    def __init__(self, message=None, title=None):
+    def __init__(self, message=None, title=None, source=None):
         super().__init__()
         self.message = message if message else self.__class__.default_message
         self.title = title if title else self.__class__.default_title
+        self.source = source if source else None
 
     def to_dict(self):
-        return dict(title=self.title, status=self.__class__.status, detail=self.message)
+        return dict(
+            title=self.title,
+            status=self.__class__.status,
+            detail=self.message,
+            **{"source": self.source} if self.source else {}
+        )
 
 
 class BadRequestError(ClientError):
