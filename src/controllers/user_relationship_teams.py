@@ -129,3 +129,26 @@ class UserRelationshipTeams(Resource):
             },
             201,
         )
+
+    @jwt_required
+    @call_before(
+        [
+            validate_accept_header,
+            validate_content_type_header,
+            validate_user_uuid,
+            validate_is_current_user,
+            validate_request_structure,
+        ]
+    )
+    @get_resource(User)
+    def delete(self, user):
+        # pylint: disable=no-self-use
+        teams, errors = get_teams_and_errors()
+        if len(errors) > 0:
+            return make_error_response(errors)
+        for team in teams:
+            if team in user.teams:
+                user.teams.remove(team)
+        DB.session.add(user)
+        DB.session.commit()
+        return None, 204
