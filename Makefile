@@ -2,8 +2,8 @@
 	db-downgrade, lint, black
 
 ARGS=$(filter-out $@,$(MAKECMDGOALS))
-DOCKER_COMPOSE_DEV=docker-compose -f docker/docker-compose.dev.yml
-DOCKER_COMPOSE_CI=docker-compose -f docker/docker-compose.ci.yml
+DOCKER_COMPOSE_DEV=./scripts/dotenv.sh docker-compose -f docker/docker-compose.dev.yml
+DOCKER_COMPOSE_CI=./scripts/dotenv.sh docker-compose -f docker/docker-compose.ci.yml
 TARGET_DIRS=src test
 
 start-dev:
